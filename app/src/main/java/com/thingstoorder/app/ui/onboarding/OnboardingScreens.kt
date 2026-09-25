@@ -207,7 +207,7 @@ fun AddItemsScreen(vm: OnboardingViewModel) = StepColumn(dots = 3) {
 
 // 04
 @Composable
-private fun RadioRow(label: String, selected: Boolean, onClick: () -> Unit) {
+internal fun RadioRow(label: String, selected: Boolean, onClick: () -> Unit) {
     Row(
         Modifier.fillMaxWidth().clip(TtoRadius.md)
             .border(1.5.dp, if (selected) TtoColor.Ink else TtoColor.Line, TtoRadius.md)

@@ -48,6 +48,10 @@
                 android:resource="@xml/widget_info" />
         </receiver>
 
+        <receiver
+            android:name=".reminders.ReminderActionReceiver"
+            android:exported="false" />
+
         <service
             android:name=".watcher.WatcherService"
             android:exported="false"

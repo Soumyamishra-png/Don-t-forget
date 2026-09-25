@@ -89,6 +89,13 @@ class SettingsRepository(private val context: Context) {
         )
     }
 
+    suspend fun setReminder(mode: ReminderMode?, hours: Int) {
+        context.settingsStore.edit { p: androidx.datastore.preferences.core.MutablePreferences ->
+            if (mode == null) p.remove(Keys.reminderMode) else p[Keys.reminderMode] = mode.name
+            p[Keys.reminderHours] = hours
+        }
+    }
+
     suspend fun setWatched(app: QcApp, watched: Boolean) {
         context.settingsStore.edit { p: androidx.datastore.preferences.core.MutablePreferences ->
             val current = (p[Keys.apps] ?: emptySet()).toMutableSet()

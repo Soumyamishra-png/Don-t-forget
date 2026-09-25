@@ -5,6 +5,7 @@ import androidx.glance.appwidget.updateAll
 import com.thingstoorder.app.data.AppDatabase
 import com.thingstoorder.app.data.SettingsRepository
 import com.thingstoorder.app.overlay.OverlayController
+import com.thingstoorder.app.reminders.ReminderScheduler
 import com.thingstoorder.app.watcher.WatcherController
 import com.thingstoorder.app.widget.DontForgetWidget
 import kotlinx.coroutines.CoroutineScope
@@ -14,6 +15,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 class DontForgetApp : Application() {
@@ -24,6 +26,14 @@ class DontForgetApp : Application() {
         super.onCreate()
         WatcherController.start(this, appScope)
         OverlayController.start(this)
+
+        var firstReminder = true
+        appScope.launch {
+            SettingsRepository(this@DontForgetApp).reminder.distinctUntilChanged().collect { setting ->
+                ReminderScheduler.schedule(this@DontForgetApp, setting, replace = !firstReminder)
+                firstReminder = false
+            }
+        }
 
         val dao = AppDatabase.get(this).itemDao()
         val settings = SettingsRepository(this)

@@ -53,6 +53,16 @@ import com.thingstoorder.app.ui.theme.TtoColor
 import com.thingstoorder.app.ui.theme.TtoRadius
 import com.thingstoorder.app.ui.theme.TtoType
 import com.thingstoorder.app.widget.WidgetPinning
+import com.thingstoorder.app.data.AppDatabase
+import com.thingstoorder.app.data.ReminderMode
+import com.thingstoorder.app.reminders.ReminderNotifier
+import com.thingstoorder.app.ui.onboarding.RadioRow
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -64,6 +74,10 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
 
     fun setWatched(app: QcApp, watched: Boolean) {
         viewModelScope.launch { repo.setWatched(app, watched) }
+    }
+
+    fun setReminder(mode: ReminderMode?, hours: Int) {
+        viewModelScope.launch { repo.setReminder(mode, hours) }
     }
 }
 
@@ -118,6 +132,10 @@ fun SettingsScreen(onBack: () -> Unit, onHelp: () -> Unit, onPrivacy: () -> Unit
     val overlay by rememberPermissionState(Permissions::overlayGranted)
     val notifications by rememberPermissionState(Permissions::notificationsGranted)
 
+    var pickerOpen by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    Box(Modifier.fillMaxSize()) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 24.dp)) {
         ScreenHeader("Settings", onBack)
 
@@ -143,8 +161,23 @@ fun SettingsScreen(onBack: () -> Unit, onHelp: () -> Unit, onPrivacy: () -> Unit
         }
 
         SectionLabel("Reminders")
-        SettingRow("Remind me", leading = { Image(painterResource(R.drawable.icon_bell), null, Modifier.size(width = 14.dp, height = 16.dp)) }) { ValueText(reminder.label, bold = true) }
+        SettingRow(
+            "Remind me",
+            leading = { Image(painterResource(R.drawable.icon_bell), null, Modifier.size(width = 14.dp, height = 16.dp)) },
+            onClick = { pickerOpen = true },
+        ) {
+            ValueText(reminder.label, bold = true)
+            Txt("›", TtoType.Body.copy(fontSize = 22.sp, fontWeight = FontWeight.Normal), color = TtoColor.GrayBody)
+        }
         SettingRow("At", leading = { Image(painterResource(R.drawable.icon_clock), null, Modifier.size(14.dp)) }) { ValueText(reminder.times) }
+        SettingRow(
+            "Send a test reminder",
+            onClick = {
+                scope.launch(Dispatchers.IO) {
+                    ReminderNotifier.post(context, AppDatabase.get(context).itemDao().getRemaining())
+                }
+            },
+        ) { Txt("›", TtoType.Body.copy(fontSize = 22.sp, fontWeight = FontWeight.Normal), color = TtoColor.GrayBody) }
 
         SectionLabel("Pop-up")
         SettingRow("After I minimize it") { ValueText("Hide until next open", bold = true) }
@@ -165,6 +198,51 @@ fun SettingsScreen(onBack: () -> Unit, onHelp: () -> Unit, onPrivacy: () -> Unit
         SettingRow("What we can see", onClick = onPrivacy) { Txt("›", TtoType.Body.copy(fontSize = 22.sp, fontWeight = FontWeight.Normal), color = TtoColor.GrayBody) }
 
         Txt("Your list stays on this phone.", TtoType.BodySmall.copy(fontSize = 12.sp), Modifier.fillMaxWidth().padding(top = 28.dp), color = TtoColor.GraySecondary, align = TextAlign.Center)
+    }
+
+    if (pickerOpen) {
+        ReminderPicker(
+            current = reminder,
+            onSave = { mode, hours -> vm.setReminder(mode, hours); pickerOpen = false },
+            onDismiss = { pickerOpen = false },
+        )
+    }
+    }
+}
+
+@Composable
+private fun ReminderPicker(current: ReminderSetting, onSave: (ReminderMode?, Int) -> Unit, onDismiss: () -> Unit) {
+    var mode by remember { mutableStateOf(current.mode) }
+    var hours by remember { mutableIntStateOf(current.hours) }
+
+    Box(Modifier.fillMaxSize().background(Color(0x6B171717)).tap(onClick = onDismiss)) {
+        Column(
+            Modifier.align(Alignment.BottomCenter).fillMaxWidth()
+                .clip(RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp)).background(TtoColor.Paper)
+                .tap { }.padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 24.dp),
+        ) {
+            Box(Modifier.size(width = 36.dp, height = 4.dp).clip(TtoRadius.pill).background(TtoColor.Faint).align(Alignment.CenterHorizontally))
+            Txt("Remind me", TtoType.SectionTitle, Modifier.padding(top = 14.dp))
+            Column(Modifier.padding(top = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                RadioRow("Off", mode == null) { mode = null }
+                RadioRow("Once a day", mode == ReminderMode.Once) { mode = ReminderMode.Once }
+                RadioRow("Twice a day", mode == ReminderMode.Twice) { mode = ReminderMode.Twice }
+                RadioRow("Custom", mode == ReminderMode.Custom) { mode = ReminderMode.Custom }
+            }
+            if (mode == ReminderMode.Custom) {
+                Txt("EVERY", TtoType.Caption, Modifier.padding(top = 16.dp), color = TtoColor.GraySecondary)
+                Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    listOf(2, 4, 6, 8).forEach { h ->
+                        val selected = hours == h
+                        Box(
+                            Modifier.clip(TtoRadius.pill).background(if (selected) TtoColor.Ink else Color.Transparent)
+                                .border(1.5.dp, TtoColor.Ink, TtoRadius.pill).tap { hours = h }.padding(horizontal = 16.dp, vertical = 7.dp),
+                        ) { Txt("${h}h", TtoType.Body.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold), color = if (selected) Color.White else TtoColor.Ink) }
+                    }
+                }
+            }
+            Box(Modifier.padding(top = 20.dp)) { PrimaryButton("Save", onClick = { onSave(mode, hours) }) }
+        }
     }
 }
 
