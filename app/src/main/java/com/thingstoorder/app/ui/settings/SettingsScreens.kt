@@ -40,6 +40,7 @@ import com.thingstoorder.app.R
 import com.thingstoorder.app.data.QcApp
 import com.thingstoorder.app.data.ReminderSetting
 import com.thingstoorder.app.data.SettingsRepository
+import com.thingstoorder.app.overlay.OverlayController
 import com.thingstoorder.app.permissions.Permissions
 import com.thingstoorder.app.permissions.rememberPermissionState
 import com.thingstoorder.app.ui.components.HairlineRule
@@ -183,9 +184,10 @@ fun HelpScreen(onBack: () -> Unit, onCheckPermissions: () -> Unit) {
             HelpStep(circles[2], 3, "Lock it in recent apps", "On Samsung, Xiaomi and OnePlus: open recents, tap our icon, choose Keep open or Lock.", null, null)
         }
         Spacer(Modifier.weight(1f))
-        PrimaryButton("Send a test pop-up", enabled = false, onClick = {})
+        val overlayOn by rememberPermissionState(Permissions::overlayGranted)
+        PrimaryButton("Send a test pop-up", enabled = overlayOn, onClick = { OverlayController.showTest() })
         Txt(
-            "Test pop-up arrives with the pop-up build.",
+            if (overlayOn) "Shows for 5 seconds over whatever is on screen." else "Turn on Draw over other apps first.",
             TtoType.BodySmall.copy(fontSize = 12.sp), Modifier.fillMaxWidth().padding(top = 8.dp), color = TtoColor.GraySecondary, align = TextAlign.Center,
         )
     }

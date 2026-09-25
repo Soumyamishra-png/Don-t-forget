@@ -46,6 +46,21 @@ class SettingsRepository(private val context: Context) {
         val apps = stringSetPreferencesKey("watched_apps")
         val widgetRequested = booleanPreferencesKey("widget_requested")
         val watcherPaused = booleanPreferencesKey("watcher_paused")
+        val pillX = intPreferencesKey("pill_x")
+        val pillY = intPreferencesKey("pill_y")
+    }
+
+    val pillPosition: Flow<Pair<Int, Int>?> = context.settingsStore.data.map { p ->
+        val x = p[Keys.pillX]
+        val y = p[Keys.pillY]
+        if (x != null && y != null) x to y else null
+    }
+
+    suspend fun setPillPosition(x: Int, y: Int) {
+        context.settingsStore.edit {
+            it[Keys.pillX] = x
+            it[Keys.pillY] = y
+        }
     }
 
     val watcherPaused: Flow<Boolean> = context.settingsStore.data.map { it[Keys.watcherPaused] ?: false }

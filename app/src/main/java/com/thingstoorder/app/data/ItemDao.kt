@@ -15,6 +15,9 @@ interface ItemDao {
     @Query("SELECT * FROM items WHERE checked = 0 ORDER BY createdAt ASC, id ASC")
     suspend fun getRemaining(): List<Item>
 
+    @Query("SELECT * FROM items WHERE checked = 0 ORDER BY createdAt ASC, id ASC")
+    fun observeRemaining(): Flow<List<Item>>
+
     @Query("SELECT COUNT(*) FROM items WHERE checked = 0")
     fun observeRemainingCount(): Flow<Int>
 

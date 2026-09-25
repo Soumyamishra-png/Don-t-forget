@@ -9,11 +9,14 @@ import com.thingstoorder.app.data.SettingsRepository
 import com.thingstoorder.app.permissions.Permissions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 object WatcherController {
+    private const val STOP_GRACE_MS = 3000L
     private val recheck = MutableStateFlow(0)
 
     fun recheckPermissions() {
@@ -28,7 +31,7 @@ object WatcherController {
         scope.launch {
             combine(settings.watchedApps, dao.observeRemainingCount(), settings.watcherPaused, recheck) { apps, remaining, paused, _ ->
                 apps.isNotEmpty() && remaining > 0 && !paused && Permissions.usageAccessGranted(app)
-            }.distinctUntilChanged { old, new -> old == new }.collect { shouldRun ->
+            }.distinctUntilChanged { old, new -> old == new }.collectLatest { shouldRun ->
                 val intent = Intent(app, WatcherService::class.java)
                 if (shouldRun) {
                     try {
@@ -37,6 +40,7 @@ object WatcherController {
                         Log.w(WatcherService.TAG, "could not start watcher from background", e)
                     }
                 } else {
+                    delay(STOP_GRACE_MS)
                     app.stopService(intent)
                 }
             }
