@@ -112,10 +112,10 @@ private fun WidgetContent(context: Context, items: List<Item>, minimized: Boolea
 }
 
 @Composable
-private fun Icon(res: Int, sizeDp: Int, tint: Color? = null) =
+private fun Icon(res: Int, sizeDp: Int, tint: Color? = null, description: String? = null) =
     Image(
         provider = ImageProvider(res),
-        contentDescription = null,
+        contentDescription = description,
         modifier = GlanceModifier.size(sizeDp.dp),
         contentScale = ContentScale.Fit,
         colorFilter = tint?.let { ColorFilter.tint(ColorProvider(it)) },
@@ -144,9 +144,9 @@ private fun Expanded(context: Context, items: List<Item>, remaining: Int) {
                 BitmapText(WidgetBitmaps.badge(context, remaining), "$remaining to order")
             }
             Spacer(GlanceModifier.defaultWeight())
-            Box(GlanceModifier.size(36.dp).clickable(AddAction), contentAlignment = Alignment.Center) { Icon(R.drawable.icon_plus, 18) }
+            Box(GlanceModifier.size(36.dp).clickable(AddAction), contentAlignment = Alignment.Center) { Icon(R.drawable.icon_plus, 18, description = "Add item") }
             Box(GlanceModifier.size(36.dp).clickable(actionRunCallback<ToggleMinimizeAction>()), contentAlignment = Alignment.Center) {
-                Icon(R.drawable.icon_chevron, 18)
+                Icon(R.drawable.icon_chevron, 18, description = "Minimize")
             }
         }
         if (items.isEmpty()) {
@@ -168,7 +168,7 @@ private fun ItemRow(item: Item) {
                 GlanceModifier.size(width = 34.dp, height = 42.dp)
                     .clickable(actionRunCallback<ToggleItemAction>(actionParametersOf(ItemIdKey to item.id))),
                 contentAlignment = Alignment.CenterStart,
-            ) { Icon(if (item.checked) R.drawable.icon_checkbox_ticked else R.drawable.icon_checkbox_empty, 18) }
+            ) { Icon(if (item.checked) R.drawable.icon_checkbox_ticked else R.drawable.icon_checkbox_empty, 18, description = if (item.checked) "Mark not done: ${item.name}" else "Mark done: ${item.name}") }
             Text(
                 item.name,
                 modifier = GlanceModifier.defaultWeight(),
@@ -184,7 +184,7 @@ private fun ItemRow(item: Item) {
                 GlanceModifier.size(width = 40.dp, height = 42.dp)
                     .clickable(actionRunCallback<RemoveItemAction>(actionParametersOf(ItemIdKey to item.id))),
                 contentAlignment = Alignment.CenterEnd,
-            ) { Icon(R.drawable.icon_subtract, 14) }
+            ) { Icon(R.drawable.icon_subtract, 14, description = "Remove ${item.name}") }
         }
         Box(GlanceModifier.fillMaxWidth().height(1.dp).background(ColorProvider(Line))) {}
     }
@@ -243,7 +243,7 @@ private fun MinimizedPill(context: Context, remaining: Int) {
         ) {
             BitmapText(WidgetBitmaps.text(context, label, 18f, 0xFF171717.toInt()), label)
             Spacer(GlanceModifier.defaultWeight())
-            Icon(R.drawable.icon_chevron_up, 20)
+            Icon(R.drawable.icon_chevron_up, 20, description = "Expand")
         }
     }
 }

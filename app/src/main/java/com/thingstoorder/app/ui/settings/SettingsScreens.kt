@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -136,7 +138,7 @@ fun SettingsScreen(onBack: () -> Unit, onHelp: () -> Unit, onPrivacy: () -> Unit
     val scope = rememberCoroutineScope()
 
     Box(Modifier.fillMaxSize()) {
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 24.dp)) {
+    Column(Modifier.fillMaxSize().systemBarsPadding().verticalScroll(rememberScrollState()).padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 24.dp)) {
         ScreenHeader("Settings", onBack)
 
         SectionLabel("Shopping apps", first = true)
@@ -219,7 +221,7 @@ private fun ReminderPicker(current: ReminderSetting, onSave: (ReminderMode?, Int
         Column(
             Modifier.align(Alignment.BottomCenter).fillMaxWidth()
                 .clip(RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp)).background(TtoColor.Paper)
-                .tap { }.padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 24.dp),
+                .tap { }.navigationBarsPadding().padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 24.dp),
         ) {
             Box(Modifier.size(width = 36.dp, height = 4.dp).clip(TtoRadius.pill).background(TtoColor.Faint).align(Alignment.CenterHorizontally))
             Txt("Remind me", TtoType.SectionTitle, Modifier.padding(top = 14.dp))
@@ -255,19 +257,18 @@ private fun PermissionValue(granted: Boolean) {
 fun HelpScreen(onBack: () -> Unit, onCheckPermissions: () -> Unit) {
     val context = LocalContext.current
     val circles = listOf(R.drawable.mark_step_circle_1, R.drawable.mark_step_circle_2, R.drawable.mark_step_circle_3)
-    Column(Modifier.fillMaxSize().padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 24.dp)) {
+    Column(Modifier.fillMaxSize().systemBarsPadding().padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 24.dp)) {
         ScreenHeader("Pop-up not showing?", onBack)
         Txt(
             "Some phones stop background apps to save battery. Check these three, in order.",
             TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.Normal, lineHeight = 20.sp),
             Modifier.padding(top = 14.dp), color = TtoColor.GrayBody,
         )
-        Column(Modifier.padding(top = 20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(top = 20.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
             HelpStep(circles[0], 1, "Permissions still on", "Usage Access and Draw over other apps.", "Check permissions", onCheckPermissions)
             HelpStep(circles[1], 2, "Battery: set to Unrestricted", "So Android doesn't stop the watcher when the screen is off.", "Open battery settings") { Permissions.openBatterySettings(context) }
             HelpStep(circles[2], 3, "Lock it in recent apps", "On Samsung, Xiaomi and OnePlus: open recents, tap our icon, choose Keep open or Lock.", null, null)
         }
-        Spacer(Modifier.weight(1f))
         val overlayOn by rememberPermissionState(Permissions::overlayGranted)
         PrimaryButton("Send a test pop-up", enabled = overlayOn, onClick = { OverlayController.showTest() })
         Txt(
@@ -300,7 +301,7 @@ private fun HelpStep(circle: Int, number: Int, title: String, body: String, acti
 
 @Composable
 fun PrivacyScreen(onBack: () -> Unit) {
-    Column(Modifier.fillMaxSize().padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 24.dp)) {
+    Column(Modifier.fillMaxSize().systemBarsPadding().padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 24.dp)) {
         ScreenHeader("What we can see", onBack)
         Spacer(Modifier.height(20.dp))
         PrivacyCard()

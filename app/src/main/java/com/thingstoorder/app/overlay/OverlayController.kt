@@ -33,7 +33,6 @@ import kotlin.math.abs
 
 object OverlayController {
     private const val TAG = "DFOverlay"
-    private const val REOPEN_WINDOW_MS = 15 * 60 * 1000L
     private const val DONE_MS = 1400L
     private const val TOAST_MS = 1400L
     private const val TEST_MS = 5000L
@@ -118,7 +117,7 @@ object OverlayController {
         if (mode == Mode.Done) return
 
         if (!wasInSession) {
-            val stayMinimized = userMinimized && SystemClock.elapsedRealtime() - leftAt < REOPEN_WINDOW_MS
+            val stayMinimized = ReopenRule.stayMinimized(userMinimized, leftAt, SystemClock.elapsedRealtime())
             if (!stayMinimized) userMinimized = false
             show(if (stayMinimized) Mode.Pill else Mode.Expanded)
         } else if (mode == Mode.Hidden) {

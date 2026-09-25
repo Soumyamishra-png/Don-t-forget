@@ -30,6 +30,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -79,7 +83,8 @@ fun ExpandedOverlay(items: List<Item>, toast: String?, onChip: (Item) -> Unit, o
 @Composable
 private fun MinimizeButton(onClick: () -> Unit) {
     Box(
-        Modifier.size(40.dp).clip(CircleShape).background(TtoColor.OffWhite).border(1.dp, TtoColor.Line, CircleShape).tap(onClick = onClick),
+        Modifier.size(40.dp).clip(CircleShape).background(TtoColor.OffWhite).border(1.dp, TtoColor.Line, CircleShape).tap(onClick = onClick)
+            .semantics { contentDescription = "Minimize"; role = Role.Button },
         contentAlignment = Alignment.Center,
     ) {
         Canvas(Modifier.size(16.dp)) {
@@ -107,7 +112,7 @@ fun DoneOverlay() {
 
 @Composable
 fun PillOverlay(count: Int) {
-    Box(Modifier.padding(14.dp)) {
+    Box(Modifier.padding(14.dp).semantics { contentDescription = "$count left to order. Tap to open." }) {
         Box(Modifier.size(56.dp).shadow(6.dp, CircleShape).background(TtoColor.Ink, CircleShape), contentAlignment = Alignment.Center) {
             Txt("$count", TtoType.Headline.copy(fontSize = 24.sp, lineHeight = 28.sp), color = TtoColor.Orange)
         }

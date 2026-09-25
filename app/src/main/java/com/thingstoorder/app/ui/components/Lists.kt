@@ -24,6 +24,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -39,8 +43,11 @@ fun HairlineRule(modifier: Modifier = Modifier) =
     Box(modifier.fillMaxWidth().height(1.dp).background(TtoColor.Row))
 
 @Composable
-fun MinusButton(onClick: () -> Unit) {
-    Box(Modifier.size(36.dp).tap(onClick = onClick), contentAlignment = Alignment.CenterEnd) {
+fun MinusButton(onClick: () -> Unit, description: String = "Remove") {
+    Box(
+        Modifier.size(36.dp).tap(onClick = onClick).semantics { contentDescription = description; role = Role.Button },
+        contentAlignment = Alignment.CenterEnd,
+    ) {
         Box(Modifier.width(10.dp).height(1.6.dp).background(TtoColor.Ink))
     }
 }

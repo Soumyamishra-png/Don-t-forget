@@ -1,14 +1,15 @@
 package com.thingstoorder.app
 
+import android.graphics.Color
 import android.os.Bundle
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,12 +45,16 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
+        )
         setContent {
             val context = LocalContext.current
             val settings = remember { SettingsRepository(context) }
             val done by settings.onboardingDone.collectAsStateWithLifecycle(initialValue = null)
 
-            Box(Modifier.fillMaxSize().background(TtoColor.Paper).systemBarsPadding().imePadding()) {
+            Box(Modifier.fillMaxSize().background(TtoColor.Paper)) {
                 when (done) {
                     null -> Unit
                     false -> OnboardingHost(onFinished = {})

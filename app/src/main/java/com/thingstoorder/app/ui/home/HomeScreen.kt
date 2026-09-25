@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -37,6 +39,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -81,7 +87,7 @@ fun HomeScreen(onOpenSettings: () -> Unit, vm: HomeViewModel = viewModel()) {
     val setupBroken = apps.isNotEmpty() && (!usage || !overlay)
 
     Box(Modifier.fillMaxSize()) {
-        Column(Modifier.fillMaxSize().padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 16.dp)) {
+        Column(Modifier.fillMaxSize().systemBarsPadding().imePadding().padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Txt("Don't Forget", TtoType.ScreenTitle, Modifier.weight(1f))
                 Box(Modifier.size(40.dp).tap(onClick = onOpenSettings), contentAlignment = Alignment.CenterEnd) {
@@ -183,7 +189,13 @@ fun HomeScreen(onOpenSettings: () -> Unit, vm: HomeViewModel = viewModel()) {
 private fun ItemRow(item: Item, vm: HomeViewModel, onEdit: () -> Unit) {
     Column {
         Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(32.dp).tap { vm.toggle(item) }, contentAlignment = Alignment.CenterStart) {
+            Box(
+                Modifier.size(32.dp).tap { vm.toggle(item) }.semantics {
+                    contentDescription = if (item.checked) "Mark not done: ${item.name}" else "Mark done: ${item.name}"
+                    role = Role.Checkbox
+                },
+                contentAlignment = Alignment.CenterStart,
+            ) {
                 Image(
                     painterResource(if (item.checked) R.drawable.icon_checkbox_ticked else R.drawable.icon_checkbox_empty),
                     null, Modifier.size(16.dp),
@@ -199,7 +211,7 @@ private fun ItemRow(item: Item, vm: HomeViewModel, onEdit: () -> Unit) {
                     Txt(item.note, TtoType.BodySmall, color = if (item.checked) TtoColor.Faint else TtoColor.GraySecondary)
                 }
             }
-            MinusButton { vm.remove(item) }
+            MinusButton({ vm.remove(item) }, "Remove ${item.name}")
         }
         HairlineRule()
     }
@@ -244,7 +256,7 @@ private fun EditSheet(item: Item, onDismiss: () -> Unit, onSave: (String, String
         Column(
             Modifier.align(Alignment.BottomCenter).fillMaxWidth().imePadding()
                 .clip(RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp)).background(TtoColor.Paper)
-                .tap { }.padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 24.dp),
+                .tap { }.navigationBarsPadding().padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 24.dp),
         ) {
             Box(Modifier.size(width = 36.dp, height = 4.dp).clip(TtoRadius.pill).background(TtoColor.Faint).align(Alignment.CenterHorizontally))
             Txt("Edit item", TtoType.SectionTitle, Modifier.padding(top = 14.dp))
