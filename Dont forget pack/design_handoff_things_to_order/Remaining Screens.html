@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Things to Order — Remaining Screens</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:#171717; --paper:#fff; --off:#F5F2EC; --line:#DDD8CC; --row:#EDEAE1;
+    --gray:#8A8578; --body:#6E6B64; --faint:#B7B2A6; --orange:#FF5E1A; --orange-soft:#FFE3D2;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--off); color:var(--ink); font-family:Inter,sans-serif; }
+  .wrap { padding:56px 48px 100px; width:max-content; max-width:none; }
+  .eyebrow { font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--gray); font-weight:600; }
+  h1 { font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:38px; margin:6px 0 6px; }
+  .lede { font-size:14px; color:var(--body); max-width:820px; line-height:1.5; }
+  h2 { font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:24px; margin:56px 0 4px; padding-top:32px; border-top:1px solid var(--line); }
+  .h2sub { font-size:14px; color:var(--body); margin:0 0 24px; max-width:820px; line-height:1.5; }
+  .decisions { background:#fff; border:1px solid var(--line); border-radius:16px; padding:20px 24px; max-width:820px; margin-top:24px; }
+  .decisions b { font-family:'Bricolage Grotesque',sans-serif; font-size:17px; }
+  .decisions ol { margin:10px 0 0; padding-left:20px; font-size:14px; line-height:1.6; color:#3A3833; }
+  .row { display:flex; gap:36px; align-items:flex-start; }
+  .col { display:flex; flex-direction:column; gap:12px; }
+  .label { font-family:'Bricolage Grotesque',sans-serif; font-weight:700; font-size:16px; }
+  .state { font-size:12px; color:var(--gray); margin-top:12px; }
+  .note { font-size:12px; color:var(--body); max-width:340px; line-height:1.5; }
+
+  .phone { width:340px; height:720px; background:#0F0F0F; border-radius:44px; padding:9px; }
+  .screen { width:100%; height:100%; border-radius:36px; overflow:hidden; background:#fff; display:flex; flex-direction:column; padding:48px 24px 24px; position:relative; }
+  .cam { position:absolute; top:10px; left:50%; transform:translateX(-50%); width:10px; height:10px; background:#000; border-radius:999px; }
+  .dots { display:flex; gap:5px; }
+  .dots i { width:6px; height:6px; border-radius:999px; background:var(--ink); }
+  .dots i.on { width:18px; }
+  .dots i.up { background:var(--line); }
+  .head { font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:28px; line-height:1.1; margin-top:22px; }
+  .sub { font-size:14px; color:var(--body); margin-top:8px; line-height:1.45; }
+  .foot { display:flex; flex-direction:column; gap:8px; }
+  .btn { background:var(--ink); color:#fff; font-weight:600; font-size:15px; text-align:center; padding:15px; border-radius:14px; }
+  .btn.dis { background:var(--line); }
+  .btn.out { background:transparent; color:var(--ink); border:1.5px solid var(--ink); padding:13.5px; }
+  .notnow { color:var(--ink); font-weight:600; font-size:14px; text-align:center; padding:8px; }
+  .grow { flex:1; }
+
+  .field { border:1.5px solid var(--ink); border-radius:14px; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; font-size:15px; }
+  .field .ph { color:var(--faint); }
+  .li { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--row); }
+  .li img.cb { width:16px; height:16px; }
+  .li span { font-size:15px; flex:1; }
+  .li.done span { color:var(--faint); text-decoration:line-through; }
+  .minus { width:10px; height:1.6px; background:var(--ink); }
+  .cap { font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--gray); }
+  .cap b { color:var(--orange); font-weight:700; }
+  .toggle { width:40px; height:24px; border-radius:999px; background:var(--line); position:relative; flex-shrink:0; }
+  .toggle::after { content:''; position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:999px; background:#fff; }
+  .toggle.on { background:var(--ink); }
+  .toggle.on::after { left:19px; }
+  .soon { font-size:11px; font-weight:600; color:var(--gray); border:1.3px solid var(--line); border-radius:999px; padding:3px 9px; }
+  .logo { height:44px; width:44px; border-radius:10px; background:#fff; display:flex; align-items:center; justify-content:center; padding:4px; flex-shrink:0; }
+  .logo img { max-width:100%; max-height:100%; object-fit:contain; }
+  .logo.sm { height:32px; width:32px; padding:2px; }
+  .chip { background:var(--off); border:1.3px solid var(--ink); border-radius:999px; padding:5px 10px; font-size:11px; font-weight:600; }
+  .srow { display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid var(--row); font-size:14px; }
+  .srow .k { flex:1; }
+  .srow .v { color:var(--body); font-size:13px; }
+  .srow .v.b { color:var(--ink); font-weight:600; }
+  .shade { background:#E9E6DF; border-radius:36px; height:100%; padding:52px 14px 20px; display:flex; flex-direction:column; gap:10px; }
+  .notif { background:#fff; border-radius:18px; padding:12px 14px; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+  .notif .top { display:flex; align-items:center; gap:8px; font-size:11px; color:var(--body); }
+  .notif .ico { width:16px; height:16px; border-radius:5px; border:1.5px dashed var(--faint); }
+  .notif .t { font-size:13px; font-weight:700; margin-top:6px; }
+  .notif .b { font-size:13px; color:#3A3833; margin-top:2px; line-height:1.4; }
+  .notif .act { display:flex; gap:18px; margin-top:10px; font-size:13px; font-weight:700; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="eyebrow">Design addendum · v1</div>
+<h1>Things to Order — remaining screens</h1>
+<p class="lede">Everything the locked handoff didn't cover: the two permission screens the overlay depends on, the "Connect apps" update, the main list screen and its states, item edit, settings, recovery help, and the system notifications. Same tokens, type and assets as the locked pack. Orange appears once per screen.</p>
+
+<div class="decisions">
+  <b>Decisions baked in (change any and I'll update)</b>
+  <ol>
+    <li>Onboarding grows from 8 to <b>10 steps</b>: Usage Access (08) and Draw over apps (09) sit between "Connect apps" and "All set" (now 10). The progress bar has 10 dots.</li>
+    <li>Amazon Fresh and Flipkart Minutes stay in the list as disabled rows tagged <b>Coming soon</b>. Picking at least one of the four live apps enables the primary button.</li>
+    <li>Tapping a pop-up chip ticks the item off the list, so widget, app and pop-up always agree.</li>
+    <li>Reminder times are fixed defaults: once a day 9am · twice a day 9am and 6pm · custom every N hours, 8am to 10pm.</li>
+    <li>Empty list means no pop-up and no pill when a shopping app opens.</li>
+    <li>Items have a name and an optional one-line note (e.g. "2 packs"). No quantities, prices or categories.</li>
+  </ol>
+</div>
+
+<!-- ============ ONBOARDING ADDITIONS ============ -->
+<h2>A · Onboarding additions</h2>
+<p class="h2sub">Screen 07 is updated; 08 and 09 are new. Screen 08 → 10 "All set" gains one summary row: <b>Pop-up: On / Off</b>.</p>
+
+<div class="row">
+
+  <!-- 07 CONNECT APPS UPDATED -->
+  <div class="col">
+    <div class="label">07 · Connect apps (updated)</div>
+    <div class="phone"><div class="screen"><div class="cam"></div>
+      <div class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i class="up"></i><i class="up"></i><i class="up"></i></div>
+      <div class="head">Where do you shop?</div>
+      <div class="sub">Your list pops up when you open these.</div>
+      <div class="grow" style="margin-top:16px;display:flex;flex-direction:column">
+        <div class="li" style="padding:10px 0"><div class="logo"><img src="assets/logos/blinkit.png"></div><span>Blinkit</span><img src="assets/icons/checkbox-empty.png" style="width:16px"></div>
+        <div class="li" style="padding:10px 0"><div class="logo"><img src="assets/logos/zepto.png"></div><span>Zepto</span><img src="assets/icons/checkbox-empty.png" style="width:16px"></div>
+        <div class="li" style="padding:10px 0"><div class="logo"><img src="assets/logos/instamart.png"></div><span>Instamart</span><img src="assets/icons/checkbox-empty.png" style="width:16px"></div>
+        <div class="li" style="padding:10px 0"><div class="logo"><img src="assets/logos/bigbasket.png"></div><span>BigBasket</span><img src="assets/icons/checkbox-empty.png" style="width:16px"></div>
+        <div class="li" style="padding:10px 0;opacity:.5"><div class="logo"><img src="assets/logos/amazon-fresh.png"></div><span>Amazon Fresh</span><div class="soon">Coming soon</div></div>
+        <div class="li" style="padding:10px 0;opacity:.5"><div class="logo"><img src="assets/logos/flipkart-minutes.png"></div><span>Flipkart Minutes</span><div class="soon">Coming soon</div></div>
+      </div>
+      <div class="foot"><div class="btn dis">Connect</div><div class="notnow">Not now</div></div>
+    </div></div>
+    <div class="state">Filled · 2 selected</div>
+    <div class="phone"><div class="screen"><div class="cam"></div>
+      <div class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i class="up"></i><i class="up"></i><i class="up"></i></div>
+      <div class="head">Where do you shop?</div>
+      <div class="sub">Your list pops up when you open these.</div>
+      <div class="grow" style="margin-top:16px;display:flex;flex-direction:column">
+        <div class="li" style="padding:10px 0"><div class="logo"><img src="assets/logos/blinkit.png"></div><span>Blinkit</span><img src="assets/icons/checkbox-ticked.png" style="width:16px"></div>
+        <div class="li" style="padding:10px 0"><div class="logo"><img src="assets/logos/zepto.png"></div><span>Zepto</span><img src="assets/icons/checkbox-ticked.png" style="width:16px"></div>
+        <div class="li" style="padding:10px 0"><div class="logo"><img src="assets/logos/instamart.png"></div><span>Instamart</span><img src="assets/icons/checkbox-empty.png" style="width:16px"></div>
+        <div class="li" style="padding:10px 0"><div class="logo"><img src="assets/logos/bigbasket.png"></div><span>BigBasket</span><img src="assets/icons/checkbox-empty.png" style="width:16px"></div>
+        <div class="li" style="padding:10px 0;opacity:.5"><div class="logo"><img src="assets/logos/amazon-fresh.png"></div><span>Amazon Fresh</span><div class="soon">Coming soon</div></div>
+        <div class="li" style="padding:10px 0;opacity:.5"><div class="logo"><img src="assets/logos/flipkart-minutes.png"></div><span>Flipkart Minutes</span><div class="soon">Coming soon</div></div>
+      </div>
+      <div class="foot"><div class="btn">Connect 2 apps</div><div class="notnow">Not now</div></div>
+    </div></div>
+  </div>
+
+  <!-- 08 USAGE ACCESS -->
+  <div class="col">
+    <div class="label">08 · Usage Access (new)</div>
+    <div class="phone"><div class="screen"><div class="cam"></div>
+      <div class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i class="up"></i><i class="up"></i></div>
+      <div class="head">Let us see when you open a shopping app.</div>
+      <div class="sub">Android calls this Usage Access.</div>
+      <div class="grow" style="display:flex;flex-direction:column;justify-content:center;gap:14px">
+        <div style="background:var(--off);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;gap:12px;align-items:flex-start"><img src="assets/icons/checkbox-ticked.png" style="width:16px;margin-top:2px"><div><div style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--gray)">What we check</div><div style="font-size:14px;margin-top:3px;line-height:1.4">Whether Blinkit, Zepto or another app you picked is on screen.</div></div></div>
+          <div style="height:1px;background:var(--line)"></div>
+          <div style="display:flex;gap:12px;align-items:flex-start"><img src="assets/icons/cross.png" style="width:14px;margin-top:3px"><div><div style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--gray)">What we never do</div><div style="font-size:14px;margin-top:3px;line-height:1.4">Read what you browse, buy or type. Nothing leaves your phone.</div></div></div>
+        </div>
+        <div style="font-size:11px;font-weight:600;color:var(--gray);letter-spacing:.06em">In Settings, you'll switch on:</div>
+        <div style="background:#fff;border:1.5px solid var(--ink);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:10px">
+          <div style="width:28px;height:28px;border-radius:8px;border:1.5px dashed var(--faint)"></div>
+          <div style="flex:1;font-size:14px;font-weight:600">Things to Order</div>
+          <div class="toggle"></div>
+        </div>
+      </div>
+      <div class="foot"><div class="btn">Open settings</div><div class="notnow">Not now</div></div>
+    </div></div>
+    <div class="state">Filled · permission granted (after returning from Settings)</div>
+    <div class="phone"><div class="screen"><div class="cam"></div>
+      <div class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i class="up"></i><i class="up"></i></div>
+      <div class="head">Let us see when you open a shopping app.</div>
+      <div class="sub">Android calls this Usage Access.</div>
+      <div class="grow" style="display:flex;flex-direction:column;justify-content:center;gap:14px;align-items:center;text-align:center">
+        <img src="assets/marks/confetti.png" style="height:44px">
+        <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px">Usage Access is on.</div>
+        <div style="font-size:14px;color:var(--body);max-width:230px;line-height:1.4">We'll know when a shopping app you picked opens.</div>
+      </div>
+      <div class="foot"><div class="btn">Continue</div></div>
+    </div></div>
+  </div>
+
+  <!-- 09 DRAW OVER APPS -->
+  <div class="col">
+    <div class="label">09 · Draw over apps (new)</div>
+    <div class="phone"><div class="screen"><div class="cam"></div>
+      <div class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i class="up"></i></div>
+      <div class="head">Let your list sit on top.</div>
+      <div class="sub">So it appears over the shopping app, not instead of it.</div>
+      <div class="grow" style="margin-top:18px;border-radius:18px;overflow:hidden;position:relative;background:#7FBFC9 url('assets/screenshots/blinkit-home.jpeg') center 30%/cover no-repeat">
+        <div style="position:absolute;left:10px;right:10px;bottom:10px;background:#fff;border-radius:18px;box-shadow:0 10px 24px rgba(0,0,0,.18);padding:12px">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:12px">tap to add</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px"><div class="chip">Oat milk</div><div class="chip">Bananas</div><div class="chip">Coffee beans</div></div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--body);text-align:center;margin:10px 0 14px">Never blocks anything underneath. Minimize it any time.</div>
+      <div class="foot"><div class="btn">Open settings</div><div class="notnow">Not now</div></div>
+    </div></div>
+    <div class="state">Filled · permission granted</div>
+    <div class="phone"><div class="screen"><div class="cam"></div>
+      <div class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i class="up"></i></div>
+      <div class="head">Let your list sit on top.</div>
+      <div class="sub">So it appears over the shopping app, not instead of it.</div>
+      <div class="grow" style="display:flex;flex-direction:column;justify-content:center;gap:14px;align-items:center;text-align:center">
+        <img src="assets/marks/confetti.png" style="height:44px">
+        <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px">Pop-up is ready.</div>
+        <div style="font-size:14px;color:var(--body);max-width:230px;line-height:1.4">Open Blinkit and your list will be waiting.</div>
+      </div>
+      <div class="foot"><div class="btn">Continue</div></div>
+    </div></div>
+  </div>
+
+  <!-- 10 ALL SET NOTE -->
+  <div class="col">
+    <div class="label">10 · All set (summary rows)</div>
+    <div class="phone"><div class="screen"><div class="cam"></div>
+      <div class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i></div>
+      <div class="grow" style="display:flex;flex-direction:column;justify-content:center">
+        <img src="assets/marks/confetti.png" style="height:44px;align-self:flex-start">
+        <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:34px;line-height:1.05;margin-top:16px">You're all set.</div>
+        <div style="margin-top:22px;display:flex;flex-direction:column">
+          <div class="srow" style="border-bottom:1px dashed var(--line);padding:11px 0"><span class="k" style="color:var(--body)">List</span><span class="v b">4 things</span></div>
+          <div class="srow" style="border-bottom:1px dashed var(--line);padding:11px 0"><span class="k" style="color:var(--body)">Reminder</span><span class="v b">Every 4 hours</span></div>
+          <div class="srow" style="border-bottom:1px dashed var(--line);padding:11px 0"><span class="k" style="color:var(--body)">Widget</span><span class="v b">Added</span></div>
+          <div class="srow" style="border-bottom:1px dashed var(--line);padding:11px 0"><span class="k" style="color:var(--body)">Notifications</span><span class="v b">On</span></div>
+          <div class="srow" style="border-bottom:1px dashed var(--line);padding:11px 0"><span class="k" style="color:var(--body)">Apps</span><span class="v b">Blinkit, Zepto</span></div>
+          <div class="srow" style="border-bottom:1px dashed var(--line);padding:11px 0"><span class="k" style="color:var(--body)">Pop-up</span><span class="v b">On</span></div>
+        </div>
+      </div>
+      <div class="btn">Go to home screen</div>
+    </div></div>
+    <div class="note">New row "Pop-up" reads <b>On</b> only when both Usage Access and Draw over apps are granted. Otherwise it reads <b>Off</b> and the home screen shows the setup banner (see B3).</div>
+  </div>
+
+</div>
+
+<!-- ============ HOME ============ -->
+<h2>B · Home (the main list)</h2>
+<p class="h2sub">Capture is the product: the add field is always at the top and gets focus fast. Tap a row's checkbox to tick it off; tap the minus to remove it; tap the item name to edit. Orange marks the remaining count, or the "Fix it" nudge when setup is incomplete, never both.</p>
+
+<div class="row">
+
+  <div class="col">
+    <div class="label">B1 · Home — populated</div>
+    <div class="phone"><div class="screen"><div class="cam"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between"><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px">Things to Order</div><img src="assets/icons/settings.png" style="height:22px"></div>
+      <div class="field" style="margin-top:18px"><span class="ph">Add something…</span><img src="assets/icons/plus.png" style="height:14px"></div>
+      <div class="cap" style="margin-top:20px"><b>4</b> to order</div>
+      <div style="margin-top:4px">
+        <div class="li"><img class="cb" src="assets/icons/checkbox-empty.png"><span>Oat milk</span><div class="minus"></div></div>
+        <div class="li"><img class="cb" src="assets/icons/checkbox-empty.png"><span>Bananas</span><div class="minus"></div></div>
+        <div class="li"><img class="cb" src="assets/icons/checkbox-empty.png"><span>Coffee beans</span><div class="minus"></div></div>
+        <div class="li"><img class="cb" src="assets/icons/checkbox-empty.png"><span>Dish soap</span><div class="minus"></div></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px"><div class="cap">Done · 1</div><div style="font-size:13px;font-weight:600;text-decoration:underline">Clear done</div></div>
+      <div style="margin-top:4px"><div class="li done"><img class="cb" src="assets/icons/checkbox-ticked.png"><span>Eggs</span><div class="minus"></div></div></div>
+      <div class="grow"></div>
+      <div style="border-top:1px dashed var(--line);padding-top:12px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--body)"><img src="assets/icons/link.png" style="width:24px"> Pop-up on for Blinkit, Zepto</div>
+    </div></div>
+  </div>
+
+  <div class="col">
+    <div class="label">B2 · Home — empty</div>
+    <div class="phone"><div class="screen"><div class="cam"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between"><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px">Things to Order</div><img src="assets/icons/settings.png" style="height:22px"></div>
+      <div class="field" style="margin-top:18px"><span style="color:var(--ink)">Milk<span style="color:var(--orange)">|</span></span><img src="assets/icons/plus.png" style="height:14px"></div>
+      <div class="grow" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px">
+        <img src="assets/icons/arrow-doodle.png" style="height:44px;transform:rotate(150deg)">
+        <div style="font-size:14px;color:var(--body);text-align:center;max-width:220px;line-height:1.45">Nothing yet. Out of milk? Write it before you forget.</div>
+      </div>
+      <div style="border-top:1px dashed var(--line);padding-top:12px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--body)"><img src="assets/icons/link.png" style="width:24px"> Pop-up stays hidden while the list is empty</div>
+    </div></div>
+    <div class="state">All done</div>
+    <div class="phone"><div class="screen"><div class="cam"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between"><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px">Things to Order</div><img src="assets/icons/settings.png" style="height:22px"></div>
+      <div class="field" style="margin-top:18px"><span class="ph">Add something…</span><img src="assets/icons/plus.png" style="height:14px"></div>
+      <div class="grow" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center">
+        <img src="assets/marks/confetti.png" style="height:44px">
+        <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px">All sorted!</div>
+        <div style="font-size:13px;color:var(--body)">Everything's in the cart.</div>
+        <div style="font-size:13px;font-weight:600;text-decoration:underline;margin-top:10px">Clear done</div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="col">
+    <div class="label">B3 · Home — setup incomplete</div>
+    <div class="phone"><div class="screen"><div class="cam"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between"><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px">Things to Order</div><img src="assets/icons/settings.png" style="height:22px"></div>
+      <div style="background:var(--orange-soft);border-radius:14px;padding:12px 14px;margin-top:16px;display:flex;align-items:center;gap:12px">
+        <div style="flex:1;font-size:13px;line-height:1.4"><b>Pop-up is off.</b> Usage Access is missing, so your list can't show up in Blinkit.</div>
+        <div style="background:var(--ink);color:#fff;font-size:12px;font-weight:600;border-radius:999px;padding:8px 14px">Fix it</div>
+      </div>
+      <div class="field" style="margin-top:14px"><span class="ph">Add something…</span><img src="assets/icons/plus.png" style="height:14px"></div>
+      <div class="cap" style="margin-top:20px">4 to order</div>
+      <div style="margin-top:4px">
+        <div class="li"><img class="cb" src="assets/icons/checkbox-empty.png"><span>Oat milk</span><div class="minus"></div></div>
+        <div class="li"><img class="cb" src="assets/icons/checkbox-empty.png"><span>Bananas</span><div class="minus"></div></div>
+        <div class="li"><img class="cb" src="assets/icons/checkbox-empty.png"><span>Coffee beans</span><div class="minus"></div></div>
+        <div class="li"><img class="cb" src="assets/icons/checkbox-empty.png"><span>Dish soap</span><div class="minus"></div></div>
+      </div>
+      <div class="grow"></div>
+    </div></div>
+    <div class="note">"Fix it" deep-links to the missing Settings page. The banner clears itself the moment the permission is back. It appears whenever a permission has been revoked, not only after skipping onboarding.</div>
+  </div>
+
+  <div class="col">
+    <div class="label">B4 · Edit item (bottom sheet)</div>
+    <div class="phone"><div class="screen" style="padding:0">
+      <div class="cam"></div>
+      <div style="padding:48px 24px 0;flex:1;position:relative;overflow:hidden">
+        <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px">Things to Order</div>
+        <div class="field" style="margin-top:18px"><span class="ph">Add something…</span><img src="assets/icons/plus.png" style="height:14px"></div>
+        <div class="cap" style="margin-top:20px">4 to order</div>
+        <div class="li"><img class="cb" src="assets/icons/checkbox-empty.png"><span>Oat milk</span><div class="minus"></div></div>
+        <div class="li"><img class="cb" src="assets/icons/checkbox-empty.png"><span>Bananas</span><div class="minus"></div></div>
+        <div class="li"><img class="cb" src="assets/icons/checkbox-empty.png"><span>Coffee beans</span><div class="minus"></div></div>
+        <div style="position:absolute;inset:0;background:rgba(23,23,23,.42)"></div>
+      </div>
+      <div style="background:#fff;border-radius:22px 22px 0 0;padding:12px 24px 24px;position:relative;box-shadow:0 -8px 24px rgba(23,23,23,.12)">
+        <div style="width:36px;height:4px;border-radius:999px;background:var(--faint);margin:0 auto 14px"></div>
+        <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:17px">Edit item</div>
+        <div class="cap" style="margin-top:16px">Name</div>
+        <div class="field" style="margin-top:6px"><span>Oat milk<span style="color:var(--orange)">|</span></span></div>
+        <div class="cap" style="margin-top:14px">Note · optional</div>
+        <div class="field" style="margin-top:6px;border-color:var(--line)"><span>2 packs</span></div>
+        <div style="display:flex;gap:10px;margin-top:20px"><div class="btn out" style="flex:1">Delete</div><div class="btn" style="flex:1">Save</div></div>
+      </div>
+    </div></div>
+    <div class="note">Opens when you tap an item's name. Delete asks nothing extra, since the list is small and an item takes seconds to re-add.</div>
+  </div>
+
+</div>
+
+<!-- ============ SETTINGS + HELP ============ -->
+<h2>C · Settings and recovery help</h2>
+<p class="h2sub">Settings is one scroll, shown in two frames. Permission rows show plain status, and "Off" is the one orange element.</p>
+
+<div class="row">
+
+  <div class="col">
+    <div class="label">C1 · Settings — top</div>
+    <div class="phone"><div class="screen"><div class="cam"></div>
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-size:20px">←</span><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px">Settings</div></div>
+      <div class="cap" style="margin-top:24px">Shopping apps</div>
+      <div style="margin-top:4px">
+        <div class="srow"><div class="logo sm"><img src="assets/logos/blinkit.png"></div><span class="k">Blinkit</span><div class="toggle on"></div></div>
+        <div class="srow"><div class="logo sm"><img src="assets/logos/zepto.png"></div><span class="k">Zepto</span><div class="toggle on"></div></div>
+        <div class="srow"><div class="logo sm"><img src="assets/logos/instamart.png"></div><span class="k">Instamart</span><div class="toggle"></div></div>
+        <div class="srow"><div class="logo sm"><img src="assets/logos/bigbasket.png"></div><span class="k">BigBasket</span><div class="toggle"></div></div>
+        <div class="srow" style="opacity:.5"><div class="logo sm"><img src="assets/logos/amazon-fresh.png"></div><span class="k">Amazon Fresh</span><div class="soon">Coming soon</div></div>
+        <div class="srow" style="opacity:.5"><div class="logo sm"><img src="assets/logos/flipkart-minutes.png"></div><span class="k">Flipkart Minutes</span><div class="soon">Coming soon</div></div>
+      </div>
+      <div class="cap" style="margin-top:22px">Reminders</div>
+      <div style="margin-top:4px">
+        <div class="srow"><img src="assets/icons/bell.png" style="width:14px"><span class="k">Remind me</span><span class="v b">Twice a day</span></div>
+        <div class="srow"><img src="assets/icons/clock.png" style="width:14px"><span class="k">At</span><span class="v">9:00 am · 6:00 pm</span></div>
+      </div>
+      <div class="grow"></div>
+    </div></div>
+  </div>
+
+  <div class="col">
+    <div class="label">C2 · Settings — bottom</div>
+    <div class="phone"><div class="screen"><div class="cam"></div>
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-size:20px">←</span><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px">Settings</div></div>
+      <div class="cap" style="margin-top:24px">Pop-up</div>
+      <div style="margin-top:4px">
+        <div class="srow"><span class="k">After I minimize it</span><span class="v b">Hide until next open</span></div>
+        <div class="srow"><span class="k">Show when list is empty</span><span class="v">Never</span></div>
+      </div>
+      <div class="cap" style="margin-top:22px">Permissions</div>
+      <div style="margin-top:4px">
+        <div class="srow"><span class="k">Usage Access</span><span class="v b">On</span></div>
+        <div class="srow"><span class="k">Draw over other apps</span><span class="v" style="color:var(--orange);font-weight:700">Off · Turn on</span></div>
+        <div class="srow"><span class="k">Notifications</span><span class="v b">On</span></div>
+      </div>
+      <div class="cap" style="margin-top:22px">Help</div>
+      <div style="margin-top:4px">
+        <div class="srow"><span class="k">Pop-up not showing?</span><span style="font-size:16px">›</span></div>
+        <div class="srow"><span class="k">What we can see</span><span style="font-size:16px">›</span></div>
+      </div>
+      <div class="grow"></div>
+      <div style="font-size:12px;color:var(--gray);text-align:center">Your list stays on this phone.</div>
+    </div></div>
+    <div class="note">"Show when list is empty" is fixed to Never in v1, shown here only so the rule is visible.</div>
+  </div>
+
+  <div class="col">
+    <div class="label">C3 · Help — pop-up not showing</div>
+    <div class="phone"><div class="screen"><div class="cam"></div>
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-size:20px">←</span><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px">Pop-up not showing?</div></div>
+      <div class="sub" style="margin-top:14px">Some phones stop background apps to save battery. Check these three, in order.</div>
+      <div style="margin-top:18px;display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;gap:12px;align-items:flex-start"><div style="position:relative;width:30px;height:30px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:14px">1<img src="assets/marks/step-circle-1.svg" style="position:absolute;left:-1px;top:-1px;width:32px;height:32px"></div><div><div style="font-size:14px;font-weight:600">Permissions still on</div><div style="font-size:13px;color:var(--body);margin-top:2px;line-height:1.4">Usage Access and Draw over other apps.</div><div style="font-size:13px;font-weight:600;text-decoration:underline;margin-top:6px">Check permissions</div></div></div>
+        <div style="display:flex;gap:12px;align-items:flex-start"><div style="position:relative;width:30px;height:30px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:14px">2<img src="assets/marks/step-circle-2.svg" style="position:absolute;left:-1px;top:-1px;width:32px;height:32px"></div><div><div style="font-size:14px;font-weight:600">Battery: set to Unrestricted</div><div style="font-size:13px;color:var(--body);margin-top:2px;line-height:1.4">So Android doesn't stop the watcher when the screen is off.</div><div style="font-size:13px;font-weight:600;text-decoration:underline;margin-top:6px">Open battery settings</div></div></div>
+        <div style="display:flex;gap:12px;align-items:flex-start"><div style="position:relative;width:30px;height:30px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:14px">3<img src="assets/marks/step-circle-3.svg" style="position:absolute;left:-1px;top:-1px;width:32px;height:32px"></div><div><div style="font-size:14px;font-weight:600">Lock it in recent apps</div><div style="font-size:13px;color:var(--body);margin-top:2px;line-height:1.4">On Samsung, Xiaomi and OnePlus: open recents, tap our icon, choose Keep open or Lock.</div></div></div>
+      </div>
+      <div class="grow"></div>
+      <div class="foot"><div class="btn">Send a test pop-up</div></div>
+    </div></div>
+    <div class="note">"Send a test pop-up" shows the tag-stack card over whatever is on screen for 5 seconds, so the user can confirm the overlay works without opening a shopping app.</div>
+  </div>
+
+</div>
+
+<!-- ============ SYSTEM SURFACES ============ -->
+<h2>D · System notifications</h2>
+<p class="h2sub">Three Android notifications. They use the app's own copy voice; the system draws the frame, so only the text, actions and small icon are ours.</p>
+
+<div class="row">
+
+  <div class="col">
+    <div class="label">D1 · Reminder</div>
+    <div class="phone"><div class="shade">
+      <div class="notif"><div class="top"><div class="ico"></div>Things to Order · now</div><div class="t">Things to Order</div><div class="b">4 things still on your list. Order them in one go?</div><div class="act"><span>Open list</span><span>Snooze 1h</span></div></div>
+    </div></div>
+    <div class="note">Sent only when items remain unticked. Body shows the first three names when expanded: "Oat milk, Bananas, Coffee beans +1". Never sent on an empty or all-done list.</div>
+  </div>
+
+  <div class="col">
+    <div class="label">D2 · Watching (persistent)</div>
+    <div class="phone"><div class="shade">
+      <div class="notif"><div class="top"><div class="ico"></div>Things to Order</div><div class="t">Watching Blinkit, Zepto</div><div class="b">Your list pops up when they open.</div><div class="act"><span>Stop</span></div></div>
+    </div></div>
+    <div class="note">Required by Android while the watcher runs, so it's set to the lowest importance (silent, no heads-up). "Stop" pauses the pop-up until the app is opened again.</div>
+  </div>
+
+  <div class="col">
+    <div class="label">D3 · Pop-up off fallback</div>
+    <div class="phone"><div class="shade">
+      <div class="notif"><div class="top"><div class="ico"></div>Things to Order · now</div><div class="t">Blinkit is open</div><div class="b">4 things on your list: Oat milk, Bananas, Coffee beans +1. Turn on the pop-up to see them here.</div><div class="act"><span>Turn on</span><span>Open list</span></div></div>
+    </div></div>
+    <div class="note">Heads-up shown once per shopping-app session when the overlay permission has been revoked, so the list still reaches the user at the moment that matters.</div>
+  </div>
+
+</div>
+
+</div>
+</body>
+</html>
