@@ -52,6 +52,7 @@ import com.thingstoorder.app.ui.components.tap
 import com.thingstoorder.app.ui.theme.TtoColor
 import com.thingstoorder.app.ui.theme.TtoRadius
 import com.thingstoorder.app.ui.theme.TtoType
+import com.thingstoorder.app.widget.WidgetPinning
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -153,6 +154,11 @@ fun SettingsScreen(onBack: () -> Unit, onHelp: () -> Unit, onPrivacy: () -> Unit
         SettingRow("Usage Access", onClick = { Permissions.openUsageAccessSettings(context) }) { PermissionValue(usage) }
         SettingRow("Draw over other apps", onClick = { Permissions.openOverlaySettings(context) }) { PermissionValue(overlay) }
         SettingRow("Notifications", onClick = { Permissions.openNotificationSettings(context) }) { PermissionValue(notifications) }
+
+        SectionLabel("Home screen")
+        SettingRow("Add widget to home screen", onClick = { WidgetPinning.requestPin(context) }) {
+            Txt("›", TtoType.Body.copy(fontSize = 22.sp, fontWeight = FontWeight.Normal), color = TtoColor.GrayBody)
+        }
 
         SectionLabel("Help")
         SettingRow("Pop-up not showing?", onClick = onHelp) { Txt("›", TtoType.Body.copy(fontSize = 22.sp, fontWeight = FontWeight.Normal), color = TtoColor.GrayBody) }

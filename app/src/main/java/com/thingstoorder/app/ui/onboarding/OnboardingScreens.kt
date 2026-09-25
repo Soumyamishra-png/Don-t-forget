@@ -68,6 +68,7 @@ import com.thingstoorder.app.ui.components.tap
 import com.thingstoorder.app.ui.theme.TtoColor
 import com.thingstoorder.app.ui.theme.TtoRadius
 import com.thingstoorder.app.ui.theme.TtoType
+import com.thingstoorder.app.widget.WidgetPinning
 
 private val body14 = TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.Normal)
 private val sub14 = TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.Normal, lineHeight = 20.sp)
@@ -285,10 +286,18 @@ fun WidgetScreen(vm: OnboardingViewModel) = StepColumn(dots = 5) {
         }
         Txt("4×2 · drag to place", TtoType.Body.copy(fontSize = 12.sp, fontWeight = FontWeight.Normal), Modifier.align(Alignment.CenterHorizontally), color = TtoColor.GrayBody)
     }
+    val context = LocalContext.current
+    val installed by rememberPermissionState(WidgetPinning::isInstalled)
     StepFooter(
-        "Add widget",
-        onPrimary = { vm.widgetRequested = true; vm.next() },
-        onNotNow = { vm.widgetRequested = false; vm.next() },
+        if (installed) "Continue" else "Add widget",
+        onPrimary = {
+            when {
+                installed -> vm.next()
+                WidgetPinning.requestPin(context) -> vm.widgetRequested = true
+                else -> vm.next()
+            }
+        },
+        onNotNow = if (installed) null else ({ vm.widgetRequested = false; vm.next() }),
     )
 }
 
@@ -444,6 +453,7 @@ fun AllSetScreen(vm: OnboardingViewModel, onFinished: () -> Unit) = StepColumn(d
     val usage by rememberPermissionState(Permissions::usageAccessGranted)
     val overlay by rememberPermissionState(Permissions::overlayGranted)
     val notifications by rememberPermissionState(Permissions::notificationsGranted)
+    val widgetInstalled by rememberPermissionState(WidgetPinning::isInstalled)
 
     val reminderText = when {
         !vm.reminderSet -> "Off"
@@ -455,7 +465,7 @@ fun AllSetScreen(vm: OnboardingViewModel, onFinished: () -> Unit) = StepColumn(d
     val rows = listOf(
         "List" to if (count == 1) "1 thing" else "$count things",
         "Reminder" to reminderText,
-        "Widget" to if (vm.widgetRequested) "Added" else "Not added",
+        "Widget" to if (widgetInstalled) "Added" else "Not added",
         "Notifications" to if (notifications) "On" else "Off",
         "Apps" to if (vm.apps.isEmpty()) "None" else vm.apps.joinToString { it.label },
         "Pop-up" to if (vm.apps.isNotEmpty() && usage && overlay) "On" else "Off",

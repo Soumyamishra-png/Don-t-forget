@@ -18,6 +18,15 @@ interface ItemDao {
     @Query("SELECT * FROM items WHERE checked = 0 ORDER BY createdAt ASC, id ASC")
     fun observeRemaining(): Flow<List<Item>>
 
+    @Query("SELECT * FROM items ORDER BY checked ASC, createdAt ASC, id ASC")
+    suspend fun getAll(): List<Item>
+
+    @Query("UPDATE items SET checked = NOT checked WHERE id = :id")
+    suspend fun toggleChecked(id: Long)
+
+    @Query("DELETE FROM items WHERE id = :id")
+    suspend fun deleteById(id: Long)
+
     @Query("SELECT COUNT(*) FROM items WHERE checked = 0")
     fun observeRemainingCount(): Flow<Int>
 
