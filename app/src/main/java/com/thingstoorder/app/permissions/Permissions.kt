@@ -45,6 +45,19 @@ object Permissions {
         launchWithFallback(context, forApp, Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION))
     }
 
+    fun openNotificationSettings(context: Context) {
+        val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+        launchWithFallback(context, intent, Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${context.packageName}")))
+    }
+
+    fun openBatterySettings(context: Context) {
+        launchWithFallback(
+            context,
+            Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS),
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${context.packageName}")),
+        )
+    }
+
     private fun launchWithFallback(context: Context, primary: Intent, fallback: Intent) {
         try {
             context.startActivity(primary.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))

@@ -20,6 +20,24 @@ data class OnboardingResult(
     val widgetRequested: Boolean,
 )
 
+data class ReminderSetting(val mode: ReminderMode?, val hours: Int) {
+    val label: String
+        get() = when (mode) {
+            null -> "Off"
+            ReminderMode.Once -> "Once a day"
+            ReminderMode.Twice -> "Twice a day"
+            ReminderMode.Custom -> "Every $hours hours"
+        }
+
+    val times: String
+        get() = when (mode) {
+            null -> "None"
+            ReminderMode.Once -> "9:00 am"
+            ReminderMode.Twice -> "9:00 am · 6:00 pm"
+            ReminderMode.Custom -> "8:00 am to 10:00 pm"
+        }
+}
+
 class SettingsRepository(private val context: Context) {
     private object Keys {
         val onboardingDone = booleanPreferencesKey("onboarding_done")
@@ -33,6 +51,21 @@ class SettingsRepository(private val context: Context) {
 
     val watchedApps: Flow<Set<QcApp>> = context.settingsStore.data.map { p ->
         (p[Keys.apps] ?: emptySet()).mapNotNull { QcApp.fromId(it) }.toSet()
+    }
+
+    val reminder: Flow<ReminderSetting> = context.settingsStore.data.map { p ->
+        ReminderSetting(
+            mode = p[Keys.reminderMode]?.let { runCatching { ReminderMode.valueOf(it) }.getOrNull() },
+            hours = p[Keys.reminderHours] ?: 4,
+        )
+    }
+
+    suspend fun setWatched(app: QcApp, watched: Boolean) {
+        context.settingsStore.edit { p: androidx.datastore.preferences.core.MutablePreferences ->
+            val current = (p[Keys.apps] ?: emptySet()).toMutableSet()
+            if (watched) current.add(app.id) else current.remove(app.id)
+            p[Keys.apps] = current
+        }
     }
 
     suspend fun completeOnboarding(result: OnboardingResult) {

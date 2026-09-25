@@ -60,6 +60,7 @@ import com.thingstoorder.app.permissions.Permissions
 import com.thingstoorder.app.permissions.rememberPermissionState
 import com.thingstoorder.app.ui.components.Chip
 import com.thingstoorder.app.ui.components.DashedDivider
+import com.thingstoorder.app.ui.components.PrivacyCard
 import com.thingstoorder.app.ui.components.ProgressDots
 import com.thingstoorder.app.ui.components.StepFooter
 import com.thingstoorder.app.ui.components.Txt
@@ -377,29 +378,11 @@ fun UsageAccessScreen(vm: OnboardingViewModel) = StepColumn(dots = 8) {
         StepFooter("Continue", onPrimary = vm::next)
     } else {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterVertically)) {
-            Column(
-                Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(TtoColor.OffWhite).padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp),
-            ) {
-                InfoRow(R.drawable.icon_checkbox_ticked, "What we check", "Whether Blinkit, Zepto or another app you picked is on screen.")
-                Box(Modifier.fillMaxWidth().height(1.dp).background(TtoColor.Line))
-                InfoRow(R.drawable.icon_cross, "What we never do", "Read what you browse, buy or type. Nothing leaves your phone.")
-            }
+            PrivacyCard()
             Txt("In Settings, you'll switch on:", TtoType.Caption.copy(fontSize = 11.sp), color = TtoColor.GraySecondary)
             SettingsMock()
         }
         StepFooter("Open settings", onPrimary = { Permissions.openUsageAccessSettings(context) }, onNotNow = vm::next)
-    }
-}
-
-@Composable
-private fun InfoRow(icon: Int, title: String, body: String) {
-    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        Image(painterResource(icon), null, Modifier.padding(top = 3.dp).size(15.dp))
-        Column {
-            Txt(title.uppercase(), TtoType.Caption, color = TtoColor.GraySecondary)
-            Txt(body, sub14, Modifier.padding(top = 3.dp))
-        }
     }
 }
 
@@ -444,7 +427,12 @@ fun OverlayScreen(vm: OnboardingViewModel) = StepColumn(dots = 9) {
         Txt(
             "Never blocks anything underneath. Minimize it any time.",
             TtoType.Body.copy(fontSize = 12.sp, fontWeight = FontWeight.Normal),
-            Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 14.dp), color = TtoColor.GrayBody, align = TextAlign.Center,
+            Modifier.fillMaxWidth().padding(top = 10.dp), color = TtoColor.GrayBody, align = TextAlign.Center,
+        )
+        Txt(
+            "On some phones this opens a long list. Find Don't Forget and switch it on.",
+            TtoType.Body.copy(fontSize = 12.sp, fontWeight = FontWeight.Normal),
+            Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 14.dp), color = TtoColor.GraySecondary, align = TextAlign.Center,
         )
         StepFooter("Open settings", onPrimary = { Permissions.openOverlaySettings(context) }, onNotNow = vm::next)
     }
