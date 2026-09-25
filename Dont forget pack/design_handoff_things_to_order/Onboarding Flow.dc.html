@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body { margin: 0; }
+a { color: #C24A00; }
+a:hover { color: #A03D00; }
+</style>
+</helmet>
+<section style="background:#F5F2EC;min-height:100vh;padding:56px 48px 100px;font-family:Inter,sans-serif;color:#171717;box-sizing:border-box;width:max-content">
+  <div style="margin:0 0 40px">
+    <div style="font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:#8A8578;font-weight:600">Onboarding · Sketchbook style (1a)</div>
+    <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:38px;margin-top:6px">Things to Order — onboarding flow</div>
+    <div style="font-size:14px;color:#6E6B64;margin-top:6px;max-width:720px">8 screens, left to right. Filled states sit under screens 3, 4 and 7.</div>
+  </div>
+
+  <div style="display:flex;gap:36px;align-items:flex-start">
+
+    <!-- 01 WELCOME -->
+    <div data-screen-label="01 Welcome" style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px">01 · Welcome</div>
+      <div style="width:340px;height:720px;background:#0F0F0F;border-radius:44px;padding:9px;box-sizing:border-box">
+        <div style="width:100%;height:100%;border-radius:36px;overflow:hidden;background:#fff;display:flex;flex-direction:column;padding:48px 24px 24px;box-sizing:border-box;position:relative">
+          <div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);width:10px;height:10px;background:#000;border-radius:999px"></div>
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:24px">
+            <img src="assets/logo-orange.svg" style="width: 61px; height: 68px">
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:34px;line-height:1.05">No need to order multiple times a day.</div>
+            <div style="font-size:15px;color:#6E6B64;line-height:1.4">Keep one list. Order once.</div>
+          </div>
+          <div style="background:#171717;color:#fff;font-weight:600;font-size:15px;text-align:center;padding:15px;border-radius:14px">Get started</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 02 HOW IT WORKS -->
+    <div data-screen-label="02 How it works" style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px">02 · How it works</div>
+      <div style="width:340px;height:720px;background:#0F0F0F;border-radius:44px;padding:9px;box-sizing:border-box">
+        <div style="width:100%;height:100%;border-radius:36px;overflow:hidden;background:#fff;display:flex;flex-direction:column;padding:48px 24px 24px;box-sizing:border-box;position:relative">
+          <div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);width:10px;height:10px;background:#000;border-radius:999px"></div>
+          <div style="display:flex;gap:5px"><sc-for list="{{ s2 }}" as="d" hint-placeholder-count="8"><div style="{{ d.style }}"></div></sc-for></div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:28px;line-height:1.1;margin-top:22px">Write it down.<br>We'll remind you.</div>
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:4px">
+            <div style="font-size:11px;font-weight:600;color:#8A8578;letter-spacing:0.06em;position:relative;top:-4px">On your home screen</div>
+            <div style="background:#fff;border:1.5px solid #171717;border-radius:18px;padding:12px 14px;width:220px">
+              <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:13px">Things to Order</div>
+              <sc-for list="{{ rows }}" as="r" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:8px;padding:4px 0"><img src="assets/icons/checkbox-empty.png" style="width:12px;height:12px"><span style="font-size:12px;flex:1">{{ r }}</span><div style="width:7px;height:1.5px;background:#171717"></div></div></sc-for>
+            </div>
+            <img src="assets/icons/arrow-doodle.png" style="height:43px;align-self:center;margin:4px 0 4px 60px;transform:scaleX(-1)">
+            <div style="font-size:11px;font-weight:600;color:#8A8578;letter-spacing:0.06em;align-self:flex-end">When you open a shopping app</div>
+            <div style="background:#fff;border-radius:18px;box-shadow:0 10px 24px rgba(0,0,0,0.18);padding:12px;width:230px;align-self:flex-end;position:relative;top:4px">
+              <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:12px">tap to add</div>
+              <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px"><sc-for list="{{ rows }}" as="r" hint-placeholder-count="3"><div style="background:#F5F2EC;border:1.3px solid #171717;border-radius:999px;padding:5px 10px;font-size:11px;font-weight:600">{{ r }}</div></sc-for></div>
+            </div>
+          </div>
+          <div style="background:#171717;color:#fff;font-weight:600;font-size:15px;text-align:center;padding:15px;border-radius:14px">Next</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 03 ADD ITEMS -->
+    <div data-screen-label="03 Add items" style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px">03 · Add your first items</div>
+      <div style="width:340px;height:720px;background:#0F0F0F;border-radius:44px;padding:9px;box-sizing:border-box">
+        <div style="width:100%;height:100%;border-radius:36px;overflow:hidden;background:#fff;display:flex;flex-direction:column;padding:48px 24px 24px;box-sizing:border-box;position:relative">
+          <div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);width:10px;height:10px;background:#000;border-radius:999px"></div>
+          <div style="display:flex;gap:5px"><sc-for list="{{ s3 }}" as="d" hint-placeholder-count="8"><div style="{{ d.style }}"></div></sc-for></div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:28px;line-height:1.1;margin-top:22px">What's running low?</div>
+          <div style="margin-top:22px;border:1.5px solid #171717;border-radius:14px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:15px;color:#B7B2A6">Type an item…</span><img src="assets/icons/plus.png" style="height:14px"></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px">
+            <img src="assets/icons/arrow-doodle.png" style="height:40px;transform:rotate(150deg)">
+            <div style="font-size:13px;color:#8A8578;text-align:center;max-width:200px">Your list shows up here. You can add more later.</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="background:#DDD8CC;color:#fff;font-weight:600;font-size:15px;text-align:center;padding:15px;border-radius:14px">Save list</div>
+            <div style="color:#171717;font-weight:600;font-size:14px;text-align:center;padding:8px">Not now</div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:#8A8578;margin-top:12px">Filled</div>
+      <div style="width:340px;height:720px;background:#0F0F0F;border-radius:44px;padding:9px;box-sizing:border-box">
+        <div style="width:100%;height:100%;border-radius:36px;overflow:hidden;background:#fff;display:flex;flex-direction:column;padding:48px 24px 24px;box-sizing:border-box;position:relative">
+          <div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);width:10px;height:10px;background:#000;border-radius:999px"></div>
+          <div style="display:flex;gap:5px"><sc-for list="{{ s3 }}" as="d" hint-placeholder-count="8"><div style="{{ d.style }}"></div></sc-for></div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:28px;line-height:1.1;margin-top:22px">What's running low?</div>
+          <div style="margin-top:22px;border:1.5px solid #171717;border-radius:14px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:15px;color:#171717">Dish soap<span style="color:#FF5E1A">|</span></span><img src="assets/icons/plus.png" style="height:14px"></div>
+          <div style="flex:1;margin-top:18px;display:flex;flex-direction:column">
+            <sc-for list="{{ added }}" as="r" hint-placeholder-count="4"><div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #EDEAE1"><img src="assets/icons/checkbox-empty.png" style="width:16px;height:16px"><span style="font-size:15px;flex:1">{{ r }}</span><div style="width:10px;height:1.6px;background:#171717"></div></div></sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="background:#171717;color:#fff;font-weight:600;font-size:15px;text-align:center;padding:15px;border-radius:14px">Save list</div>
+            <div style="color:#171717;font-weight:600;font-size:14px;text-align:center;padding:8px">Not now</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 04 REMINDER -->
+    <div data-screen-label="04 Reminder" style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px">04 · Reminder frequency</div>
+      <div style="width:340px;height:720px;background:#0F0F0F;border-radius:44px;padding:9px;box-sizing:border-box">
+        <div style="width:100%;height:100%;border-radius:36px;overflow:hidden;background:#fff;display:flex;flex-direction:column;padding:48px 24px 24px;box-sizing:border-box;position:relative">
+          <div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);width:10px;height:10px;background:#000;border-radius:999px"></div>
+          <div style="display:flex;gap:5px"><sc-for list="{{ s4 }}" as="d" hint-placeholder-count="8"><div style="{{ d.style }}"></div></sc-for></div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:28px;line-height:1.1;margin-top:22px">How often should we remind you?</div>
+          <div style="margin-top:26px;display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ freqDefault }}" as="o" hint-placeholder-count="3"><div style="{{ o.box }}"><span style="font-size:15px;font-weight:600">{{ o.label }}</span><div style="{{ o.radio }}"></div></div></sc-for>
+          </div>
+          <div style="flex:1"></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="background:#DDD8CC;color:#fff;font-weight:600;font-size:15px;text-align:center;padding:15px;border-radius:14px">Set reminder</div>
+            <div style="color:#171717;font-weight:600;font-size:14px;text-align:center;padding:8px">Not now</div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:#8A8578;margin-top:12px">Filled · Custom selected</div>
+      <div style="width:340px;height:720px;background:#0F0F0F;border-radius:44px;padding:9px;box-sizing:border-box">
+        <div style="width:100%;height:100%;border-radius:36px;overflow:hidden;background:#fff;display:flex;flex-direction:column;padding:48px 24px 24px;box-sizing:border-box;position:relative">
+          <div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);width:10px;height:10px;background:#000;border-radius:999px"></div>
+          <div style="display:flex;gap:5px"><sc-for list="{{ s4 }}" as="d" hint-placeholder-count="8"><div style="{{ d.style }}"></div></sc-for></div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:28px;line-height:1.1;margin-top:22px">How often should we remind you?</div>
+          <div style="margin-top:26px;display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ freqFilled }}" as="o" hint-placeholder-count="3"><div style="{{ o.box }}"><span style="font-size:15px;font-weight:600">{{ o.label }}</span><div style="{{ o.radio }}"></div></div></sc-for>
+          </div>
+          <div style="margin-top:16px;font-size:12px;font-weight:600;color:#8A8578;letter-spacing:0.06em">Every</div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <sc-for list="{{ hours }}" as="h" hint-placeholder-count="4"><div style="{{ h.style }}">{{ h.label }}</div></sc-for>
+          </div>
+          <div style="flex:1"></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="background:#171717;color:#fff;font-weight:600;font-size:15px;text-align:center;padding:15px;border-radius:14px">Set reminder</div>
+            <div style="color:#171717;font-weight:600;font-size:14px;text-align:center;padding:8px">Not now</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 05 ADD WIDGET -->
+    <div data-screen-label="05 Add widget" style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px">05 · Add the widget</div>
+      <div style="width:340px;height:720px;background:#0F0F0F;border-radius:44px;padding:9px;box-sizing:border-box">
+        <div style="width:100%;height:100%;border-radius:36px;overflow:hidden;background:#fff;display:flex;flex-direction:column;padding:48px 24px 24px;box-sizing:border-box;position:relative">
+          <div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);width:10px;height:10px;background:#000;border-radius:999px"></div>
+          <div style="display:flex;gap:5px"><sc-for list="{{ s5 }}" as="d" hint-placeholder-count="8"><div style="{{ d.style }}"></div></sc-for></div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:28px;line-height:1.1;margin-top:22px">Put it on your home screen.</div>
+          <div style="margin-top:20px;display:flex;flex-direction:column;gap:12px">
+            <sc-for list="{{ widgetSteps }}" as="s" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:12px"><div style="position:relative;width:30px;height:30px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:14px">{{ s.n }}<img src="{{ s.circle }}" style="position: absolute; left: -1px; top: -1px; width: 32px; height: 32px"></div><span style="font-size:14px">{{ s.text }}</span></div></sc-for>
+          </div>
+          <div style="flex:1;margin-top:18px;background:#F5F2EC;border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:8px;position:relative">
+            <div style="width:36px;height:4px;border-radius:999px;background:#B7B2A6;align-self:center"></div>
+            <div style="font-size:11px;font-weight:600;color:#8A8578">Widgets</div>
+            <div style="display:flex;gap:8px"><div style="flex:1;height:44px;background:#EDEAE1;border-radius:10px"></div><div style="flex:1;height:44px;background:#EDEAE1;border-radius:10px"></div></div>
+            <div style="position:relative;background:#fff;border:1.5px solid #171717;border-radius:14px;padding:10px 12px">
+              <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:12px">Things to Order</div>
+              <div style="display:flex;align-items:center;gap:6px;margin-top:6px"><img src="assets/icons/checkbox-empty.png" style="width:10px;height:10px"><span style="font-size:11px">Oat milk</span></div>
+              <div style="display:flex;align-items:center;gap:6px;margin-top:4px"><img src="assets/icons/checkbox-empty.png" style="width:10px;height:10px"><span style="font-size:11px">Bananas</span></div>
+              
+            </div>
+            <div style="font-size:11px;color:#6E6B64;align-self:center">4×2 · drag to place</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px">
+            <div style="background:#171717;color:#fff;font-weight:600;font-size:15px;text-align:center;padding:15px;border-radius:14px">Add widget</div>
+            <div style="color:#171717;font-weight:600;font-size:14px;text-align:center;padding:8px">Not now</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 06 NOTIFICATIONS -->
+    <div data-screen-label="06 Notifications" style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px">06 · Notifications</div>
+      <div style="width:340px;height:720px;background:#0F0F0F;border-radius:44px;padding:9px;box-sizing:border-box">
+        <div style="width:100%;height:100%;border-radius:36px;overflow:hidden;background:#fff;display:flex;flex-direction:column;padding:48px 24px 24px;box-sizing:border-box;position:relative">
+          <div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);width:10px;height:10px;background:#000;border-radius:999px"></div>
+          <div style="display:flex;gap:5px"><sc-for list="{{ s6 }}" as="d" hint-placeholder-count="8"><div style="{{ d.style }}"></div></sc-for></div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:28px;line-height:1.1;margin-top:22px">Can we nudge you?</div>
+          <div style="font-size:14px;color:#6E6B64;margin-top:8px">Only when something's still on your list.</div>
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px">
+            
+            <img src="assets/icons/bell.png" style="height: 25px; align-self: center; width: 22px"><div style="background:#fff;border-radius:16px;box-shadow:0 10px 24px rgba(0,0,0,0.14);padding:12px 14px;display:flex;gap:10px;align-items:flex-start">
+              <div style="width:28px;height:28px;border-radius:8px;border:1.5px dashed #B7B2A6;flex-shrink:0"></div>
+              <div style="flex:1"><div style="display:flex;justify-content:space-between"><span style="font-size:12px;font-weight:700">Things to Order</span><span style="font-size:11px;color:#8A8578">now</span></div><div style="font-size:12px;color:#3A3833;margin-top:2px">4 things still on your list. Order them in one go?</div></div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="background:#171717;color:#fff;font-weight:600;font-size:15px;text-align:center;padding:15px;border-radius:14px">Turn on</div>
+            <div style="color:#171717;font-weight:600;font-size:14px;text-align:center;padding:8px">Not now</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 07 CONNECT APPS -->
+    <div data-screen-label="07 Connect apps" style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px">07 · Connect apps</div>
+      <div style="width:340px;height:720px;background:#0F0F0F;border-radius:44px;padding:9px;box-sizing:border-box">
+        <div style="width:100%;height:100%;border-radius:36px;overflow:hidden;background:#fff;display:flex;flex-direction:column;padding:48px 24px 24px;box-sizing:border-box;position:relative">
+          <div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);width:10px;height:10px;background:#000;border-radius:999px"></div>
+          <div style="display:flex;gap:5px"><sc-for list="{{ s7 }}" as="d" hint-placeholder-count="8"><div style="{{ d.style }}"></div></sc-for></div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:28px;line-height:1.1;margin-top:22px">Where do you shop?</div>
+          <div style="font-size:14px;color:#6E6B64;margin-top:8px">Your list pops up when you open these.</div>
+          <div style="flex:1;margin-top:16px;display:flex;flex-direction:column">
+            <sc-for list="{{ appsDefault }}" as="a" hint-placeholder-count="6"><div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #EDEAE1"><div style="height:44px;width:44px;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;padding:4px;box-sizing:border-box;flex-shrink:0"><img src="{{ a.logo }}" style="max-width:100%;max-height:100%;object-fit:contain"></div><span style="font-size:15px;flex:1">{{ a.name }}</span><img src="{{ a.box }}" style="width:16px;height:16px"></div></sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="background:#DDD8CC;color:#fff;font-weight:600;font-size:15px;text-align:center;padding:15px;border-radius:14px">Connect</div>
+            <div style="color:#171717;font-weight:600;font-size:14px;text-align:center;padding:8px">Not now</div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:#8A8578;margin-top:12px">Filled · 2 selected</div>
+      <div style="width:340px;height:720px;background:#0F0F0F;border-radius:44px;padding:9px;box-sizing:border-box">
+        <div style="width:100%;height:100%;border-radius:36px;overflow:hidden;background:#fff;display:flex;flex-direction:column;padding:48px 24px 24px;box-sizing:border-box;position:relative">
+          <div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);width:10px;height:10px;background:#000;border-radius:999px"></div>
+          <div style="display:flex;gap:5px"><sc-for list="{{ s7 }}" as="d" hint-placeholder-count="8"><div style="{{ d.style }}"></div></sc-for></div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:28px;line-height:1.1;margin-top:22px">Where do you shop?</div>
+          <div style="font-size:14px;color:#6E6B64;margin-top:8px">Your list pops up when you open these.</div>
+          <div style="flex:1;margin-top:16px;display:flex;flex-direction:column">
+            <sc-for list="{{ appsFilled }}" as="a" hint-placeholder-count="6"><div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #EDEAE1"><div style="height:44px;width:44px;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;padding:4px;box-sizing:border-box;flex-shrink:0"><img src="{{ a.logo }}" style="max-width:100%;max-height:100%;object-fit:contain"></div><span style="font-size:15px;flex:1">{{ a.name }}</span><img src="{{ a.box }}" style="width:16px;height:16px"></div></sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="background:#171717;color:#fff;font-weight:600;font-size:15px;text-align:center;padding:15px;border-radius:14px">Connect 2 apps</div>
+            <div style="color:#171717;font-weight:600;font-size:14px;text-align:center;padding:8px">Not now</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 08 ALL SET -->
+    <div data-screen-label="08 All set" style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px">08 · All set</div>
+      <div style="width:340px;height:720px;background:#0F0F0F;border-radius:44px;padding:9px;box-sizing:border-box">
+        <div style="width:100%;height:100%;border-radius:36px;overflow:hidden;background:#fff;display:flex;flex-direction:column;padding:48px 24px 24px;box-sizing:border-box;position:relative">
+          <div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);width:10px;height:10px;background:#000;border-radius:999px"></div>
+          <div style="display:flex;gap:5px"><sc-for list="{{ s8 }}" as="d" hint-placeholder-count="8"><div style="{{ d.style }}"></div></sc-for></div>
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+            <img src="assets/marks/confetti.png" style="height:44px;align-self:flex-start">
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:34px;line-height:1.05;margin-top:16px">You're all set.</div>
+            <div style="margin-top:22px;display:flex;flex-direction:column">
+              <sc-for list="{{ summary }}" as="s" hint-placeholder-count="5"><div style="display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px dashed #DDD8CC"><span style="font-size:14px;color:#6E6B64">{{ s.k }}</span><span style="font-size:14px;font-weight:600;text-align:right">{{ s.v }}</span></div></sc-for>
+            </div>
+          </div>
+          <div style="background:#171717;color:#fff;font-weight:600;font-size:15px;text-align:center;padding:15px;border-radius:14px">Go to home screen</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const dots = (active) => Array.from({ length: 8 }, (_, i) => ({
+      style: i === active
+        ? 'width:18px;height:6px;border-radius:999px;background:#171717'
+        : `width:6px;height:6px;border-radius:999px;background:${i < active ? '#171717' : '#DDD8CC'}`,
+    }));
+    const opt = (label, on) => ({
+      label,
+      box: `display:flex;align-items:center;justify-content:space-between;padding:16px;border-radius:14px;border:1.5px solid ${on ? '#171717' : '#DDD8CC'}`,
+      radio: on
+        ? 'width:18px;height:18px;border-radius:999px;border:5px solid #171717;box-sizing:border-box'
+        : 'width:18px;height:18px;border-radius:999px;border:1.5px solid #B7B2A6;box-sizing:border-box',
+    });
+    const freq = ['Once a day', 'Twice a day', 'Custom'];
+    const apps = [['Blinkit', 'assets/logos/blinkit.png'], ['Zepto', 'assets/logos/zepto.png'], ['Instamart', 'assets/logos/instamart.png'], ['BigBasket', 'assets/logos/bigbasket.png'], ['Amazon Fresh', 'assets/logos/amazon-fresh.png'], ['Flipkart Minutes', 'assets/logos/flipkart-minutes.png']];
+    const app = (sel) => apps.map(([name, logo], i) => ({ logo, name, box: sel.includes(i) ? 'assets/icons/checkbox-ticked.png' : 'assets/icons/checkbox-empty.png' }));
+    return {
+      s2: dots(1), s3: dots(2), s4: dots(3), s5: dots(4), s6: dots(5), s7: dots(6), s8: dots(7),
+      rows: ['Oat milk', 'Bananas', 'Coffee beans'],
+      added: ['Oat milk', 'Bananas', 'Coffee beans', 'Eggs'],
+      freqDefault: freq.map(l => opt(l, false)),
+      freqFilled: freq.map(l => opt(l, l === 'Custom')),
+      hours: ['2h', '4h', '6h', '8h'].map(label => ({
+        label,
+        style: label === '4h'
+          ? 'flex:1;text-align:center;padding:10px 0;border-radius:999px;background:#171717;color:#fff;font-size:13px;font-weight:600'
+          : 'flex:1;text-align:center;padding:10px 0;border-radius:999px;border:1.5px solid #171717;font-size:13px;font-weight:600',
+      })),
+      widgetSteps: [
+        { n: '1', text: 'Long-press your home screen', circle: 'assets/marks/step-circle-1.svg' },
+        { n: '2', text: 'Tap Widgets', circle: 'assets/marks/step-circle-2.svg' },
+        { n: '3', text: 'Drag Things to Order onto it', circle: 'assets/marks/step-circle-3.svg' },
+      ],
+      appsDefault: app([]),
+      appsFilled: app([0, 1]),
+      summary: [
+        { k: 'List', v: '4 things' },
+        { k: 'Reminder', v: 'Every 4 hours' },
+        { k: 'Widget', v: 'Added' },
+        { k: 'Notifications', v: 'On' },
+        { k: 'Apps', v: 'Blinkit, Zepto' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

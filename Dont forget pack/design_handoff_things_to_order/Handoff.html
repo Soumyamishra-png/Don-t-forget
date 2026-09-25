@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Things to Order — Design Handoff</title>
+<style>
+  body { margin:0; font-family:-apple-system,Inter,sans-serif; background:#F5F2EC; color:#171717; }
+  .wrap { max-width:1000px; margin:0 auto; padding:56px 32px 120px; }
+  h1 { font-size:36px; margin:0 0 6px; }
+  h2 { font-size:24px; margin:56px 0 4px; border-top:1px solid #DDD8CC; padding-top:36px; }
+  h3 { font-size:17px; margin:28px 0 10px; }
+  p { line-height:1.55; color:#3A3833; }
+  .tag { display:inline-block; background:#171717; color:#fff; font-size:12px; font-weight:600; padding:3px 10px; border-radius:999px; margin-right:6px; }
+  .note { background:#FFF3EA; border:1px solid #FFD9BC; border-radius:10px; padding:14px 18px; font-size:14px; }
+  .warn { background:#FFF7E0; border:1px solid #F0D98C; border-radius:10px; padding:14px 18px; font-size:14px; }
+  code { background:#EFEBE2; padding:2px 6px; border-radius:4px; font-size:13px; }
+  table { border-collapse:collapse; width:100%; font-size:14px; margin:12px 0; }
+  td, th { border:1px solid #DDD8CC; padding:8px 10px; text-align:left; vertical-align:top; }
+  th { background:#EFEBE2; }
+  .swatch-row { display:flex; gap:14px; flex-wrap:wrap; margin:14px 0; }
+  .swatch { width:120px; }
+  .swatch .box { height:60px; border-radius:8px; border:1px solid #ddd; }
+  .swatch .label { font-size:12px; margin-top:6px; }
+  img.shot { max-width:100%; border:1px solid #DDD8CC; border-radius:12px; margin:12px 0; }
+  iframe { width:100%; border:1px solid #DDD8CC; border-radius:12px; margin:12px 0; }
+  .asset-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); gap:12px; margin:12px 0; }
+  .asset-grid div { text-align:center; font-size:10px; color:#6E6B64; }
+  .asset-grid img { max-width:40px; max-height:40px; display:block; margin:0 auto 4px; }
+  ul { line-height:1.6; }
+  a { color:#C24A00; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="tag">Design reference</div>
+<h1>Things to Order — Design Handoff</h1>
+<p>An Android app that surfaces a running "things to order" list at three moments: first-time onboarding, a home-screen widget, and a pop-up when the user opens a quick-commerce app (Blinkit, Zepto, etc.). This package covers the home-screen widget, the quick-commerce pop-up, the onboarding flow, and the underlying design system.</p>
+
+<div class="note">
+<strong>About these files.</strong> Everything here is an HTML/CSS design reference (built as interactive prototypes), not production code. The task is to recreate this design in the target codebase's real environment. Note: a real Android home-screen widget is natively built (Kotlin + Jetpack Glance, or RemoteViews) — it cannot literally be this HTML. Treat the HTML as the exact visual/interaction spec (colors, spacing, type, copy, states) to rebuild natively. The onboarding and in-app screens are regular app screens and can be built more directly from this markup in whatever framework the app uses.
+</div>
+
+<div class="warn">
+<strong>Open question — tech stack.</strong> No target codebase was specified at the time of this handoff. Confirm before starting: Is this a native Android app (Kotlin/Jetpack Compose + Glance for the widget), a React Native app (which will need a native widget module), or something else?
+</div>
+
+<h3>Fidelity</h3>
+<p><strong>High-fidelity.</strong> Colors, type, spacing, copy, and states below are final and should be matched closely. Where noted "placeholder," real assets are still pending from the design owner.</p>
+
+<h2>1. Design tokens</h2>
+<p>Full interactive reference: <code>Things to Order - Style Guide.dc.html</code> (open in a browser).</p>
+
+<h3>Color</h3>
+<div class="swatch-row">
+  <div class="swatch"><div class="box" style="background:#171717"></div><div class="label">Ink<br><code>#171717</code></div></div>
+  <div class="swatch"><div class="box" style="background:#FFFFFF"></div><div class="label">Paper<br><code>#FFFFFF</code></div></div>
+  <div class="swatch"><div class="box" style="background:#F5F2EC"></div><div class="label">Off-white<br><code>#F5F2EC</code></div></div>
+  <div class="swatch"><div class="box" style="background:#DDD8CC"></div><div class="label">Line<br><code>#DDD8CC</code></div></div>
+  <div class="swatch"><div class="box" style="background:#8A8578"></div><div class="label">Gray (secondary text)<br><code>#8A8578</code></div></div>
+  <div class="swatch"><div class="box" style="background:#6E6B64"></div><div class="label">Gray (body)<br><code>#6E6B64</code></div></div>
+  <div class="swatch"><div class="box" style="background:#FF5E1A"></div><div class="label">Orange (accent only)<br><code>#FF5E1A</code></div></div>
+  <div class="swatch"><div class="box" style="background:#FFE3D2"></div><div class="label">Orange soft<br><code>#FFE3D2</code></div></div>
+</div>
+<p><strong>Rule:</strong> 90%+ of any screen is ink-on-paper (black/white/gray). Orange marks exactly one action, number, or emphasis point per screen — never a full background or more than one accent at a time.</p>
+
+<h3>Typography</h3>
+<table>
+<tr><th>Role</th><th>Font</th><th>Weight</th><th>Size</th></tr>
+<tr><td>Display / headline</td><td>Bricolage Grotesque</td><td>800</td><td>28–44px</td></tr>
+<tr><td>Screen title</td><td>Bricolage Grotesque</td><td>700–800</td><td>17–22px</td></tr>
+<tr><td>Body</td><td>Inter</td><td>500</td><td>14–16px</td></tr>
+<tr><td>Body small / list item</td><td>Inter</td><td>400</td><td>12–14px</td></tr>
+<tr><td>Caption / label</td><td>Inter</td><td>600</td><td>11–12px, uppercase, 0.06em tracking</td></tr>
+</table>
+<p>Google Fonts: <code>Bricolage Grotesque</code> (opsz,wght axis) + <code>Inter</code> (400/500/600/700).</p>
+
+<h3>Spacing scale</h3>
+<p><code>4, 8, 12, 16, 24, 32, 48, 64</code> px</p>
+
+<h3>Radius scale</h3>
+<p><code>sm 6px · md 14px · lg 22px · pill 999px</code></p>
+
+<h3>Core components</h3>
+<ul>
+<li><strong>Buttons:</strong> primary orange fill (#FF5E1A, black text), secondary black fill (white text), outline (1.5px black border), disabled (1.5px #DDD8CC border, gray fill/text)</li>
+<li><strong>Checkbox:</strong> 1.6px black square outline (unchecked); solid black fill + white checkmark (checked); checked label gets strikethrough + gray text</li>
+<li><strong>Add-item row:</strong> dashed top border (1px #DDD8CC) + "+ [action]" in orange</li>
+<li><strong>Minimized pill:</strong> black fill, white text, 999px radius</li>
+<li><strong>Card shell:</strong> white fill, 18px radius, 1px #DDD8CC border, soft shadow <code>0 8px 24px rgba(23,23,23,0.08)</code></li>
+</ul>
+
+<h2>2. Home-screen widget — "Things to Order"</h2>
+<p><span class="tag">Locked variant: Notepad (1a)</span> Android widget, 4×2 grid cell. Minimized = 4×1 pill; maximized = 4×2 with the list scrolling inside. Tapping "+ jot something" opens the app (no inline text entry in the widget itself). A secondary maximized layout ("light 1c") is also locked as an alternate treatment — dark-ink card inverted to a white/outlined card, same content.</p>
+<img class="shot" src="handoff_screens/widget-1a.png" alt="Widget variant 1a — all states">
+<h3>States</h3>
+<table>
+<tr><th>State</th><th>Spec</th></tr>
+<tr><td>Maximized</td><td>White card, 22px radius. Header: "Things to Order" (Bricolage 800, 17px) + chevron (▲, points up to indicate collapse). List rows: 16px checkbox + item name (Inter 500, 14px) + flat minus-line icon (subtract/remove), right-aligned. List scrolls if &gt;4 items. Footer row: dashed top border, "+ jot something" in orange.</td></tr>
+<tr><td>Maximized · light 1c</td><td>Same white card, 1.5px black border. Header row: "To order" title + orange pill badge with count + plus icon + chevron, gap 8px between plus and chevron. Extra top margin (14px) between header and first row. Rows separated by 1px #EDEAE1 lines, each ending in the same flat minus-line icon.</td></tr>
+<tr><td>Minimized</td><td>Black pill, white "N things to order" text, chevron rotated 180° (points down, to expand).</td></tr>
+<tr><td>Empty</td><td>Header + a hand-drawn arrow doodle pointing at empty space + one line of copy ("Nothing yet. Out of milk? Write it before you forget.") + same "+ jot something" footer.</td></tr>
+<tr><td>All done</td><td>Confetti mark centered, "All sorted!" (Bricolage 800, 20px), "Everything's in the cart." (gray, 13px).</td></tr>
+</table>
+<p>Live reference (scroll to variant 1a): <a href="Home%20Widget%20Variations.dc.html#1a" target="_blank">Home Widget Variations.dc.html#1a</a></p>
+<iframe src="Home Widget Variations.dc.html#1a" height="900"></iframe>
+
+<h2>3. Quick-commerce pop-up</h2>
+<p><span class="tag">Locked variant: Tag stack (2b)</span> Triggers the instant a connected quick-commerce app opens. Floats non-blocking over the app (doesn't dim/block interaction underneath) until the user minimizes it or clears every item. Items render as wrapping name-only tag chips — tap a chip to copy its name (for pasting into that app's search) and it drops out of the stack. Host-app screenshot behind it is the user's real Blinkit screenshot, cropped to fill, full brightness, no scrim.</p>
+<img class="shot" src="handoff_screens/popup-2b.png" alt="Pop-up variant 2b — all states">
+<h3>States</h3>
+<table>
+<tr><th>State</th><th>Spec</th></tr>
+<tr><td>Initial</td><td>White rounded card (20px radius) bottom-anchored, 12px inset from screen edges. Header "tap to add" + circular chevron button (▼, points down = minimize). Chips: #F5F2EC fill, 1.4px black border, 999px radius, 12px/600 text.</td></tr>
+<tr><td>Tapped → copied</td><td>Small black toast pill above the card: <code>Copied "[item]"</code>. The tapped chip is removed from the wrap.</td></tr>
+<tr><td>All handled</td><td>Card collapses to a centered message: confetti mark + "Nothing left to add" + "Minimizing…" — then auto-transitions to minimized.</td></tr>
+<tr><td>Minimized</td><td>Small black circular pill, bottom-right corner, draggable, shows remaining count in orange.</td></tr>
+</table>
+<p>Live reference (scroll to variant 2b): <a href="Quick%20Commerce%20Popup%20Variations.dc.html#2b" target="_blank">Quick Commerce Popup Variations.dc.html#2b</a></p>
+<iframe src="Quick Commerce Popup Variations.dc.html#2b" height="900"></iframe>
+
+<h2>4. Onboarding flow</h2>
+<p><span class="tag">Locked style: Sketchbook (1a)</span> 8 screens, no global skip — each optional screen has its own "Not now" beneath an action-specific primary button (which is disabled/gray until the screen's required input is given). Progress shown as an 8-dot bar (active dot pill-shaped, 18×6px; passed dots solid black; upcoming dots #DDD8CC).</p>
+<img class="shot" src="handoff_screens/onboarding-flow.png" alt="Full onboarding flow, 8 screens">
+
+<h3>Screen-by-screen</h3>
+
+<h3>01 · Welcome</h3>
+<img class="shot" src="handoff_screens/01-welcome.png" alt="01 Welcome">
+<p>Logo (orange, <code>assets/logo-orange.svg</code>, ~86×96px) · Headline "No need to order multiple times a day." (Bricolage 800, 34px) · Subhead "Keep one list. Order once." (gray, 15px) · Primary button "Get started" (no "Not now" — required first screen).</p>
+
+<h3>02 · How it works</h3>
+<img class="shot" src="handoff_screens/02-how-it-works.png" alt="02 How it works">
+<p>Headline "Write it down.<br>We'll remind you." Two stacked cards: the real widget card ("On your home screen" label above it) and the real pop-up card ("When you open a shopping app" label above it), linked by a hand-drawn arrow doodle pointing from the first down to the second. Primary button "Next".</p>
+
+<h3>03 · Add your first items</h3>
+<img class="shot" src="handoff_screens/03-add-items.png" alt="03 Add items — default and filled">
+<p><strong>Default:</strong> text input (border 1.5px black, 14px radius) with placeholder "Type an item…" + plus icon; empty-state arrow doodle + "Your list shows up here. You can add more later."; primary button "Save list" (disabled/gray). <strong>Filled:</strong> input shows typed text with an orange text-cursor mark; below it, added items render as full checkbox rows (16px checkbox, 15px text, minus-line icon), separated by 1px lines; primary button turns solid black "Save list" once ≥1 item exists. "Not now" beneath in both states.</p>
+
+<h3>04 · Reminder frequency</h3>
+<img class="shot" src="handoff_screens/04-reminder.png" alt="04 Reminder — default and filled">
+<p>Headline "How often should we remind you?" Three radio rows: Once a day / Twice a day / Custom (16px pill-outline box, 1.5px border; selected = black border + filled black radio dot). <strong>Custom selected</strong> reveals an "Every" label + 4 hour chips (2h/4h/6h/8h, pill shape, selected chip solid black). Primary button "Set reminder" (disabled until a frequency is picked).</p>
+
+<h3>05 · Add the widget</h3>
+<img class="shot" src="handoff_screens/05-add-widget.png" alt="05 Add widget">
+<p>Headline "Put it on your home screen." Three numbered steps (each number sits inside a hand-drawn circle mark — three distinct hand-drawn SVG circles, <code>assets/marks/step-circle-1/2/3.svg</code>, black stroke, no fill): 1 "Long-press your home screen," 2 "Tap Widgets," 3 "Drag Things to Order onto it." Below: a mock Android widget tray (off-white sheet, drag handle, "Widgets" label, generic widget placeholders + our widget card highlighted with a hand-drawn circle mark) + caption "4×2 · drag to place." Primary button "Add widget", "Not now" beneath.</p>
+
+<h3>06 · Notifications</h3>
+<img class="shot" src="handoff_screens/06-notifications.png" alt="06 Notifications">
+<p>Headline "Can we nudge you?" + subhead "Only when something's still on your list." Bell icon + a sample notification card (app icon placeholder, "Things to Order" title, "now" timestamp, body "4 things still on your list. Order them in one go?"). This is the app's own pre-prompt only — the native Android permission dialog is not depicted; trigger it after this screen's primary action. Primary button "Turn on", "Not now" beneath.</p>
+
+<h3>07 · Connect quick-commerce apps</h3>
+<img class="shot" src="handoff_screens/07-connect-apps.png" alt="07 Connect apps — default and filled">
+<p>Headline "Where do you shop?" + subhead "Your list pops up when you open these." List of 6 apps, each row: 44×44px white square logo box (no border, <code>object-fit:contain</code>, real logos in <code>assets/logos/</code>) + app name (15px) + checkbox icon. Apps in order: Blinkit, Zepto, Instamart, BigBasket, Amazon Fresh, Flipkart Minutes. <strong>Filled</strong> state shows 2 checked; primary button label updates to "Connect 2 apps" (disabled/gray "Connect" when none selected). "Not now" beneath.</p>
+
+<h3>08 · All set</h3>
+<img class="shot" src="handoff_screens/08-all-set.png" alt="08 All set">
+<p>Confetti mark, "You're all set." (Bricolage 800, 34px), then a dashed-divider summary list of what was configured (List: N things · Reminder: frequency · Widget: Added · Notifications: On/Off · Apps: names). Single button "Go to home screen" (no "Not now" — terminal screen).</p>
+
+<p>Live reference (full flow): <a href="Onboarding%20Flow.dc.html" target="_blank">Onboarding Flow.dc.html</a></p>
+<iframe src="Onboarding Flow.dc.html" height="900"></iframe>
+
+<h2>5. Interactions &amp; behavior summary</h2>
+<ul>
+<li><strong>Widget tap targets:</strong> chevron toggles minimize/maximize; tapping a checkbox strikes the item through and grays it; tapping the minus-line icon removes the item from the list; "+ jot something" / "+ add" opens the app (no inline widget text entry).</li>
+<li><strong>Pop-up lifecycle:</strong> appears the instant a connected quick-commerce app opens → floats non-blocking → tapping a chip copies its name to clipboard and removes the chip → once all chips are cleared, shows a brief "done" message then auto-minimizes to a draggable pill → pill re-expands the card on tap.</li>
+<li><strong>Onboarding:</strong> linear, 8 screens, no back-skip pattern specified; each optional screen (03, 04, 05, 06, 07) has its own "Not now"; primary CTAs disable until their screen's minimum input is satisfied (an item typed, a frequency picked, ≥0 apps is allowed — confirm with design owner whether 07 requires ≥1 app or allows 0).</li>
+</ul>
+
+<h2>6. Assets</h2>
+<p>All source assets are bundled in <code>assets/</code>. Icons and marks are small hand-drawn-style line art — do not recolor to anything outside the orange/black palette above.</p>
+<h3>Icons (assets/icons/)</h3>
+<div class="asset-grid">
+<div><img src="assets/icons/checkbox-empty.png">checkbox-empty</div>
+<div><img src="assets/icons/checkbox-ticked.png">checkbox-ticked</div>
+<div><img src="assets/icons/plus.png">plus</div>
+<div><img src="assets/icons/chevron.png">chevron</div>
+<div><img src="assets/icons/cross.png">cross</div>
+<div><img src="assets/icons/drag-handle.png">drag-handle</div>
+<div><img src="assets/icons/subtract.png">subtract</div>
+<div><img src="assets/icons/edit-pencil.png">edit-pencil</div>
+<div><img src="assets/icons/bell.png">bell</div>
+<div><img src="assets/icons/clock.png">clock</div>
+<div><img src="assets/icons/cart.png">cart</div>
+<div><img src="assets/icons/link.png">link</div>
+<div><img src="assets/icons/search.png">search</div>
+<div><img src="assets/icons/settings.png">settings</div>
+<div><img src="assets/icons/star.png">star</div>
+<div><img src="assets/icons/arrow-doodle.png">arrow-doodle</div>
+</div>
+<h3>Illustrations (assets/illustrations/) — placeholder resolution, low-res</h3>
+<div class="asset-grid">
+<div><img src="assets/illustrations/carrot.png">carrot</div>
+<div><img src="assets/illustrations/fruit-apple.png">fruit-apple</div>
+<div><img src="assets/illustrations/fruit-orange.png">fruit-orange</div>
+<div><img src="assets/illustrations/bottle.png">bottle</div>
+<div><img src="assets/illustrations/bread.png">bread</div>
+<div><img src="assets/illustrations/long-grocery-list.png">long-grocery-list</div>
+</div>
+<h3>Decorative marks (assets/marks/)</h3>
+<div class="asset-grid">
+<div><img src="assets/marks/circle-1.png">circle-1</div>
+<div><img src="assets/marks/circle-2.png">circle-2</div>
+<div><img src="assets/marks/circle-3.png">circle-3</div>
+<div><img src="assets/marks/circle-4.png">circle-4</div>
+<div><img src="assets/marks/confetti.png">confetti</div>
+<div><img src="assets/marks/step-circle-1.svg">step-circle-1</div>
+<div><img src="assets/marks/step-circle-2.svg">step-circle-2</div>
+<div><img src="assets/marks/step-circle-3.svg">step-circle-3</div>
+</div>
+<h3>Brand</h3>
+<div class="asset-grid">
+<div><img src="assets/logo-orange.svg">logo-orange</div>
+</div>
+<h3>Quick-commerce app logos (assets/logos/) — third-party marks, user-supplied</h3>
+<div class="asset-grid">
+<div><img src="assets/logos/blinkit.png">Blinkit</div>
+<div><img src="assets/logos/zepto.png">Zepto</div>
+<div><img src="assets/logos/instamart.png">Instamart</div>
+<div><img src="assets/logos/bigbasket.png">BigBasket</div>
+<div><img src="assets/logos/amazon-fresh.png">Amazon Fresh</div>
+<div><img src="assets/logos/flipkart-minutes.png">Flipkart Minutes</div>
+</div>
+<p><strong>Note:</strong> the fruit/grocery illustrations are low-resolution placeholders (some as small as 30–75px wide) supplied early in the project — flag to the design owner for higher-res replacements before production use. The quick-commerce app logos are each company's real trademarked assets, used here only for prototyping recognizability — confirm licensing/usage rights before shipping, or swap for neutral placeholders.</p>
+
+<h2>7. Files in this package</h2>
+<table>
+<tr><th>File</th><th>Contents</th></tr>
+<tr><td><code>Home Widget Variations.dc.html</code></td><td>All widget explorations; variant <strong>1a is locked</strong> (see section 2). Other variants (1b–1e) are earlier options, not in scope.</td></tr>
+<tr><td><code>Quick Commerce Popup Variations.dc.html</code></td><td>All pop-up explorations; variant <strong>2b is locked</strong> (see section 3). Variants 2a/2c are earlier options, not in scope.</td></tr>
+<tr><td><code>Onboarding Flow.dc.html</code></td><td>The complete, locked 8-screen onboarding flow (see section 4).</td></tr>
+<tr><td><code>Things to Order - Style Guide.dc.html</code></td><td>Interactive design-token and component reference (see section 1).</td></tr>
+<tr><td><code>support.js</code></td><td>Runtime file the .dc.html files depend on — keep alongside them, do not edit.</td></tr>
+<tr><td><code>assets/</code></td><td>All icons, illustrations, marks, logo, and third-party app logos referenced above.</td></tr>
+<tr><td><code>handoff_screens/</code></td><td>Static screenshots embedded in this document.</td></tr>
+</table>
+
+</div>
+</body>
+</html>
