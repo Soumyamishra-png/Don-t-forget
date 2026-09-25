@@ -18,7 +18,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import com.thingstoorder.app.data.SettingsRepository
+import com.thingstoorder.app.watcher.WatcherController
+import kotlinx.coroutines.launch
 import com.thingstoorder.app.ui.home.HomeScreen
 import com.thingstoorder.app.ui.onboarding.OnboardingHost
 import com.thingstoorder.app.ui.settings.HelpScreen
@@ -29,6 +32,16 @@ import com.thingstoorder.app.ui.theme.TtoColor
 private enum class Screen { Home, Settings, Help, Privacy }
 
 class MainActivity : ComponentActivity() {
+    override fun onStart() {
+        super.onStart()
+        lifecycleScope.launch { SettingsRepository(applicationContext).setWatcherPaused(false) }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        WatcherController.recheckPermissions()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {

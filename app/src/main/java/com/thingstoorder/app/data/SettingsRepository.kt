@@ -45,6 +45,13 @@ class SettingsRepository(private val context: Context) {
         val reminderHours = intPreferencesKey("reminder_hours")
         val apps = stringSetPreferencesKey("watched_apps")
         val widgetRequested = booleanPreferencesKey("widget_requested")
+        val watcherPaused = booleanPreferencesKey("watcher_paused")
+    }
+
+    val watcherPaused: Flow<Boolean> = context.settingsStore.data.map { it[Keys.watcherPaused] ?: false }
+
+    suspend fun setWatcherPaused(paused: Boolean) {
+        context.settingsStore.edit { it[Keys.watcherPaused] = paused }
     }
 
     val onboardingDone: Flow<Boolean> = context.settingsStore.data.map { it[Keys.onboardingDone] ?: false }
