@@ -168,16 +168,21 @@ private fun pillDrawable(state: WidgetMascotState) = when (state) {
     WidgetMascotState.AllDone -> R.drawable.widget_pill_alldone
 }
 
+private const val STRIP_HEIGHT_DP = 76
+private const val STRIP_FACE_DP = 48
+private const val PILL_FACE_DP = 34
+private const val TAKEOVER_FACE_DP = 72
+
 @Composable
 private fun MascotStrip(state: WidgetMascotState) {
     val iconTint = if (state.faceIsLight) Color.White else Ink
     Row(
-        GlanceModifier.fillMaxWidth().height(52.dp).background(ImageProvider(stripDrawable(state))).padding(horizontal = 10.dp),
+        GlanceModifier.fillMaxWidth().height(STRIP_HEIGHT_DP.dp).background(ImageProvider(stripDrawable(state))).padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(GlanceModifier.size(36.dp)) {}
         Box(GlanceModifier.defaultWeight(), contentAlignment = Alignment.Center) {
-            Icon(state.face, 32, description = null)
+            Icon(state.face, STRIP_FACE_DP, description = null)
         }
         Box(GlanceModifier.size(36.dp).clickable(actionRunCallback<AddFromStripAction>()), contentAlignment = Alignment.Center) {
             Icon(R.drawable.icon_plus, 18, tint = iconTint, description = "Add item")
@@ -279,7 +284,7 @@ private fun MinimizedPill(context: Context, state: WidgetMascotState, copy: Widg
             .padding(start = 18.dp, end = 12.dp).clickable(actionRunCallback<ToggleMinimizeAction>()),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(state.face, 26, description = null)
+        Icon(state.face, PILL_FACE_DP, description = null)
         Spacer(GlanceModifier.width(8.dp))
         BitmapText(WidgetBitmaps.text(context, copy.pillLabel, 15f, textColor), copy.pillLabel)
         Spacer(GlanceModifier.defaultWeight())
@@ -295,8 +300,8 @@ private fun Takeover(context: Context, state: WidgetMascotState, copy: WidgetCop
         verticalAlignment = Alignment.CenterVertically,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Icon(state.face, 40, description = null)
-        Spacer(GlanceModifier.height(6.dp))
+        Icon(state.face, TAKEOVER_FACE_DP, description = null)
+        Spacer(GlanceModifier.height(10.dp))
         BitmapText(WidgetBitmaps.text(context, copy.takeoverLine, 18f, textColor), copy.takeoverLine)
     }
 }
