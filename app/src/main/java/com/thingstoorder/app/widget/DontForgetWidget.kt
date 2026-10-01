@@ -21,7 +21,6 @@ import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionRunCallback
-import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.lazy.LazyColumn
 import androidx.glance.appwidget.lazy.items
 import androidx.glance.appwidget.provideContent
@@ -67,10 +66,12 @@ class DontForgetWidget : GlanceAppWidget() {
         val settings = SettingsRepository(context)
         val initialItems = dao.getAll()
         val initialMinimized = settings.widgetMinimized.first()
+        val initialTakeover = settings.widgetTakeoverUntil.first()
         provideContent {
             val items by dao.observeAll().collectAsState(initialItems)
             val minimized by settings.widgetMinimized.collectAsState(initialMinimized)
-            WidgetContent(context, items, minimized)
+            val takeoverUntil by settings.widgetTakeoverUntil.collectAsState(initialTakeover)
+            WidgetContent(context, items, minimized, takeoverUntil)
         }
     }
 }
@@ -101,13 +102,29 @@ class ToggleMinimizeAction : ActionCallback {
     }
 }
 
+// Dismisses the full-color takeover and opens quick-add in one tap, same destination as the
+// regular "+" (there's no dedicated "Typing" screen yet -- that's the Voice phase).
+class DismissTakeoverAction : ActionCallback {
+    override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
+        SettingsRepository(context).setWidgetTakeoverUntil(null)
+        DontForgetWidget().updateAll(context)
+        context.startActivity(
+            Intent().setClassName("com.thingstoorder.app", QuickAddActivity::class.java.name)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+        )
+    }
+}
+
 @Composable
-private fun WidgetContent(context: Context, items: List<Item>, minimized: Boolean) {
+private fun WidgetContent(context: Context, items: List<Item>, minimized: Boolean, takeoverUntil: Long?) {
+    val now = System.currentTimeMillis()
+    val state = WidgetMascotState.of(items, now)
+    val copy = WidgetCopyBuilder.forState(state, items, now)
     val remaining = items.count { !it.checked }
     when {
-        minimized -> MinimizedPill(context, remaining)
-        items.isNotEmpty() && remaining == 0 -> AllDone(context)
-        else -> Expanded(context, items, remaining)
+        takeoverUntil != null && now < takeoverUntil -> Takeover(context, state, copy)
+        minimized -> MinimizedPill(context, state, copy)
+        else -> Expanded(context, items, remaining, state, copy)
     }
 }
 
@@ -130,31 +147,81 @@ private fun BitmapText(bitmap: SizedBitmap, description: String) =
         contentScale = ContentScale.Fit,
     )
 
-private val AddAction get() = actionStartActivity(Intent().setClassName("com.thingstoorder.app", QuickAddActivity::class.java.name))
+private fun stripDrawable(state: WidgetMascotState) = when (state) {
+    WidgetMascotState.Empty -> R.drawable.widget_strip_empty
+    WidgetMascotState.Eager -> R.drawable.widget_strip_eager
+    WidgetMascotState.Stale -> R.drawable.widget_strip_stale
+    WidgetMascotState.AllDone -> R.drawable.widget_strip_alldone
+}
+
+private fun takeoverDrawable(state: WidgetMascotState) = when (state) {
+    WidgetMascotState.Empty -> R.drawable.widget_takeover_empty
+    WidgetMascotState.Eager -> R.drawable.widget_takeover_eager
+    WidgetMascotState.Stale -> R.drawable.widget_takeover_stale
+    WidgetMascotState.AllDone -> R.drawable.widget_takeover_alldone
+}
+
+private fun pillDrawable(state: WidgetMascotState) = when (state) {
+    WidgetMascotState.Empty -> R.drawable.widget_pill_empty
+    WidgetMascotState.Eager -> R.drawable.widget_pill_eager
+    WidgetMascotState.Stale -> R.drawable.widget_pill_stale
+    WidgetMascotState.AllDone -> R.drawable.widget_pill_alldone
+}
 
 @Composable
-private fun Expanded(context: Context, items: List<Item>, remaining: Int) {
-    Column(
-        GlanceModifier.fillMaxSize().background(ImageProvider(R.drawable.widget_card_bg)).padding(start = 18.dp, end = 12.dp, top = 12.dp, bottom = 8.dp),
+private fun MascotStrip(state: WidgetMascotState) {
+    val iconTint = if (state.faceIsLight) Color.White else Ink
+    Row(
+        GlanceModifier.fillMaxWidth().height(52.dp).background(ImageProvider(stripDrawable(state))).padding(horizontal = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(GlanceModifier.fillMaxWidth().height(34.dp), verticalAlignment = Alignment.CenterVertically) {
-            BitmapText(WidgetBitmaps.text(context, "To order", 20f, 0xFF171717.toInt()), "To order")
-            if (remaining > 0) {
-                Spacer(GlanceModifier.width(8.dp))
-                BitmapText(WidgetBitmaps.badge(context, remaining), "$remaining to order")
-            }
-            Spacer(GlanceModifier.defaultWeight())
-            Box(GlanceModifier.size(36.dp).clickable(AddAction), contentAlignment = Alignment.Center) { Icon(R.drawable.icon_plus, 18, description = "Add item") }
-            Box(GlanceModifier.size(36.dp).clickable(actionRunCallback<ToggleMinimizeAction>()), contentAlignment = Alignment.Center) {
-                Icon(R.drawable.icon_chevron, 18, description = "Minimize")
-            }
+        Box(GlanceModifier.size(36.dp)) {}
+        Box(GlanceModifier.defaultWeight(), contentAlignment = Alignment.Center) {
+            Icon(state.face, 32, description = null)
         }
-        if (items.isEmpty()) {
-            EmptyBody()
-        } else {
-            Spacer(GlanceModifier.height(8.dp))
-            LazyColumn(GlanceModifier.fillMaxWidth().defaultWeight()) {
-                items(items, itemId = { it.id }) { ItemRow(it) }
+        Box(GlanceModifier.size(36.dp).clickable(actionRunCallback<AddFromStripAction>()), contentAlignment = Alignment.Center) {
+            Icon(R.drawable.icon_plus, 18, tint = iconTint, description = "Add item")
+        }
+        Box(GlanceModifier.size(36.dp).clickable(actionRunCallback<ToggleMinimizeAction>()), contentAlignment = Alignment.Center) {
+            Icon(R.drawable.icon_chevron, 18, tint = iconTint, description = "Minimize")
+        }
+    }
+}
+
+class AddFromStripAction : ActionCallback {
+    override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
+        context.startActivity(
+            Intent().setClassName("com.thingstoorder.app", QuickAddActivity::class.java.name)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+        )
+    }
+}
+
+@Composable
+private fun Expanded(context: Context, items: List<Item>, remaining: Int, state: WidgetMascotState, copy: WidgetCopy) {
+    Column(GlanceModifier.fillMaxSize().background(ImageProvider(R.drawable.widget_card_bg))) {
+        MascotStrip(state)
+        Column(GlanceModifier.fillMaxWidth().defaultWeight().padding(start = 18.dp, end = 12.dp, top = 10.dp, bottom = 8.dp)) {
+            Row(GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                BitmapText(WidgetBitmaps.text(context, "Things to Order", 16f, 0xFF171717.toInt()), "Things to Order")
+                if (remaining > 0) {
+                    Spacer(GlanceModifier.width(8.dp))
+                    BitmapText(WidgetBitmaps.badge(context, remaining), "$remaining to order")
+                }
+            }
+            Text(
+                copy.caption,
+                modifier = GlanceModifier.padding(top = 2.dp),
+                style = TextStyle(color = ColorProvider(GrayBody), fontSize = 12.sp),
+                maxLines = 1,
+            )
+            if (items.isEmpty()) {
+                EmptyBody()
+            } else {
+                Spacer(GlanceModifier.height(6.dp))
+                LazyColumn(GlanceModifier.fillMaxWidth().defaultWeight()) {
+                    items(items, itemId = { it.id }) { ItemRow(it) }
+                }
             }
         }
     }
@@ -163,9 +230,9 @@ private fun Expanded(context: Context, items: List<Item>, remaining: Int) {
 @Composable
 private fun ItemRow(item: Item) {
     Column(GlanceModifier.fillMaxWidth()) {
-        Row(GlanceModifier.fillMaxWidth().height(42.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(GlanceModifier.fillMaxWidth().height(38.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
-                GlanceModifier.size(width = 34.dp, height = 42.dp)
+                GlanceModifier.size(width = 34.dp, height = 38.dp)
                     .clickable(actionRunCallback<ToggleItemAction>(actionParametersOf(ItemIdKey to item.id))),
                 contentAlignment = Alignment.CenterStart,
             ) { Icon(if (item.checked) R.drawable.icon_checkbox_ticked else R.drawable.icon_checkbox_empty, 18, description = if (item.checked) "Mark not done: ${item.name}" else "Mark done: ${item.name}") }
@@ -174,14 +241,14 @@ private fun ItemRow(item: Item) {
                 modifier = GlanceModifier.defaultWeight(),
                 style = TextStyle(
                     color = ColorProvider(if (item.checked) Faint else Ink),
-                    fontSize = 16.sp,
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.Medium,
                     textDecoration = if (item.checked) TextDecoration.LineThrough else TextDecoration.None,
                 ),
                 maxLines = 1,
             )
             Box(
-                GlanceModifier.size(width = 40.dp, height = 42.dp)
+                GlanceModifier.size(width = 40.dp, height = 38.dp)
                     .clickable(actionRunCallback<RemoveItemAction>(actionParametersOf(ItemIdKey to item.id))),
                 contentAlignment = Alignment.CenterEnd,
             ) { Icon(R.drawable.icon_subtract, 14, description = "Remove ${item.name}") }
@@ -192,16 +259,8 @@ private fun ItemRow(item: Item) {
 
 @Composable
 private fun EmptyBody() {
-    Column(GlanceModifier.fillMaxSize().clickable(AddAction), verticalAlignment = Alignment.CenterVertically) {
-        Row(GlanceModifier.fillMaxWidth().padding(end = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                "Nothing yet. Out of milk? Write it before you forget.",
-                modifier = GlanceModifier.defaultWeight(),
-                style = TextStyle(color = ColorProvider(GrayBody), fontSize = 15.sp),
-            )
-            Icon(R.drawable.icon_arrow_doodle, 32)
-        }
-        Spacer(GlanceModifier.height(10.dp))
+    Column(GlanceModifier.fillMaxSize().clickable(actionRunCallback<AddFromStripAction>())) {
+        Spacer(GlanceModifier.defaultWeight())
         Box(GlanceModifier.fillMaxWidth().height(1.dp).background(ColorProvider(Line))) {}
         Text(
             "+ Add something",
@@ -212,38 +271,32 @@ private fun EmptyBody() {
 }
 
 @Composable
-private fun AllDone(context: Context) {
-    Column(
-        GlanceModifier.fillMaxSize().background(ImageProvider(R.drawable.widget_card_bg)).clickable(AddAction),
+private fun MinimizedPill(context: Context, state: WidgetMascotState, copy: WidgetCopy) {
+    val textColor = if (state.faceIsLight) 0xFFFFFFFF.toInt() else 0xFF171717.toInt()
+    val iconTint = if (state.faceIsLight) Color.White else Ink
+    Row(
+        GlanceModifier.fillMaxWidth().height(52.dp).background(ImageProvider(pillDrawable(state)))
+            .padding(start = 18.dp, end = 12.dp).clickable(actionRunCallback<ToggleMinimizeAction>()),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Icon(R.drawable.mark_confetti, 30)
-        Spacer(GlanceModifier.height(4.dp))
-        BitmapText(WidgetBitmaps.text(context, "All sorted!", 22f, 0xFF171717.toInt()), "All sorted!")
-        Text(
-            "Everything's in the cart.",
-            style = TextStyle(color = ColorProvider(GrayBody), fontSize = 14.sp, textAlign = TextAlign.Center),
-        )
+        Icon(state.face, 26, description = null)
+        Spacer(GlanceModifier.width(8.dp))
+        BitmapText(WidgetBitmaps.text(context, copy.pillLabel, 15f, textColor), copy.pillLabel)
+        Spacer(GlanceModifier.defaultWeight())
+        Icon(R.drawable.icon_chevron_up, 18, tint = iconTint, description = "Expand")
     }
 }
 
 @Composable
-private fun MinimizedPill(context: Context, remaining: Int) {
-    val label = when (remaining) {
-        0 -> "Nothing to order"
-        1 -> "1 thing to order"
-        else -> "$remaining things to order"
-    }
-    Column(GlanceModifier.fillMaxSize()) {
-        Row(
-            GlanceModifier.fillMaxWidth().height(52.dp).background(ImageProvider(R.drawable.widget_pill_bg))
-                .padding(start = 20.dp, end = 12.dp).clickable(actionRunCallback<ToggleMinimizeAction>()),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            BitmapText(WidgetBitmaps.text(context, label, 18f, 0xFF171717.toInt()), label)
-            Spacer(GlanceModifier.defaultWeight())
-            Icon(R.drawable.icon_chevron_up, 20, description = "Expand")
-        }
+private fun Takeover(context: Context, state: WidgetMascotState, copy: WidgetCopy) {
+    val textColor = if (state.faceIsLight) 0xFFFFFFFF.toInt() else 0xFF171717.toInt()
+    Column(
+        GlanceModifier.fillMaxSize().background(ImageProvider(takeoverDrawable(state))).clickable(actionRunCallback<DismissTakeoverAction>()),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Icon(state.face, 40, description = null)
+        Spacer(GlanceModifier.height(6.dp))
+        BitmapText(WidgetBitmaps.text(context, copy.takeoverLine, 18f, textColor), copy.takeoverLine)
     }
 }

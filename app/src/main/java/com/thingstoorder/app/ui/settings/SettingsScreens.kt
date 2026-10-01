@@ -54,7 +54,9 @@ import com.thingstoorder.app.ui.components.tap
 import com.thingstoorder.app.ui.theme.TtoColor
 import com.thingstoorder.app.ui.theme.TtoRadius
 import com.thingstoorder.app.ui.theme.TtoType
+import com.thingstoorder.app.widget.DontForgetWidget
 import com.thingstoorder.app.widget.WidgetPinning
+import androidx.glance.appwidget.updateAll
 import com.thingstoorder.app.data.AppDatabase
 import com.thingstoorder.app.data.ReminderMode
 import com.thingstoorder.app.reminders.ReminderNotifier
@@ -176,7 +178,10 @@ fun SettingsScreen(onBack: () -> Unit, onHelp: () -> Unit, onPrivacy: () -> Unit
             "Send a test reminder",
             onClick = {
                 scope.launch(Dispatchers.IO) {
+                    val settingsRepo = SettingsRepository(context)
                     ReminderNotifier.post(context, AppDatabase.get(context).itemDao().getRemaining())
+                    settingsRepo.setWidgetTakeoverUntil(System.currentTimeMillis() + 3 * 60 * 60 * 1000L)
+                    DontForgetWidget().updateAll(context)
                 }
             },
         ) { Txt("›", TtoType.Body.copy(fontSize = 22.sp, fontWeight = FontWeight.Normal), color = TtoColor.GrayBody) }

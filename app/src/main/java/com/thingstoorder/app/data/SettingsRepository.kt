@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -49,6 +50,15 @@ class SettingsRepository(private val context: Context) {
         val widgetMinimized = booleanPreferencesKey("widget_minimized")
         val pillX = intPreferencesKey("pill_x")
         val pillY = intPreferencesKey("pill_y")
+        val widgetTakeoverUntil = longPreferencesKey("widget_takeover_until")
+    }
+
+    val widgetTakeoverUntil: Flow<Long?> = context.settingsStore.data.map { it[Keys.widgetTakeoverUntil] }
+
+    suspend fun setWidgetTakeoverUntil(until: Long?) {
+        context.settingsStore.edit { p: androidx.datastore.preferences.core.MutablePreferences ->
+            if (until == null) p.remove(Keys.widgetTakeoverUntil) else p[Keys.widgetTakeoverUntil] = until
+        }
     }
 
     val pillPosition: Flow<Pair<Int, Int>?> = context.settingsStore.data.map { p ->
