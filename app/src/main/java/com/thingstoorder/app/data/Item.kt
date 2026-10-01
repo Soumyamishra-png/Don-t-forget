@@ -10,4 +10,7 @@ data class Item(
     val note: String? = null,
     val checked: Boolean = false,
     val createdAt: Long = System.currentTimeMillis(),
+    // Reset to "now" when the user taps Keep on a stale item; staleness age is measured
+    // from this if set, otherwise from createdAt.
+    val staleResetAt: Long? = null,
 )

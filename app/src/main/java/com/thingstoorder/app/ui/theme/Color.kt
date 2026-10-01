@@ -14,4 +14,12 @@ object TtoColor {
     val Orange = Color(0xFFFF5E1A)
     val OrangeSoft = Color(0xFFFFE3D2)
     val OrangeText = Color(0xFFC24A00)
+
+    // Stale-item age tags: grey (1 day) -> amber (3 days) -> deep orange (a week).
+    val StaleDaySoft = Color(0xFFEDEAE1)
+    val StaleDayText = Color(0xFF6E6B64)
+    val StaleThreeSoft = Color(0xFFFCE8B8)
+    val StaleThreeText = Color(0xFF8A5A00)
+    val StaleWeekSoft = Color(0xFFFFD4BE)
+    val StaleWeekText = Color(0xFFB33C00)
 }

@@ -41,4 +41,8 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     fun clearDone() {
         viewModelScope.launch { dao.clearChecked() }
     }
+
+    fun keepFresh(item: Item) {
+        viewModelScope.launch { dao.keepFresh(item.id, System.currentTimeMillis()) }
+    }
 }

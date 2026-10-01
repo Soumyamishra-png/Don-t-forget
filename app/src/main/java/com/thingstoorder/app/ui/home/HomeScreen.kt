@@ -56,6 +56,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.thingstoorder.app.R
 import com.thingstoorder.app.data.Item
+import com.thingstoorder.app.data.StaleSort
+import com.thingstoorder.app.data.StaleTier
 import com.thingstoorder.app.permissions.Permissions
 import com.thingstoorder.app.permissions.rememberPermissionState
 import com.thingstoorder.app.ui.components.AddField
@@ -78,12 +80,19 @@ fun HomeScreen(onOpenSettings: () -> Unit, vm: HomeViewModel = viewModel()) {
 
     var text by rememberSaveable { mutableStateOf("") }
     var editingId by rememberSaveable { mutableStateOf<Long?>(null) }
+    var keepCardId by rememberSaveable { mutableStateOf<Long?>(null) }
     val editing = items.firstOrNull { it.id == editingId }
+    val keepCardItem = items.firstOrNull { it.id == keepCardId }
 
-    BackHandler(enabled = editing != null) { editingId = null }
+    BackHandler(enabled = editing != null || keepCardItem != null) {
+        editingId = null
+        keepCardId = null
+    }
 
-    val remaining = items.filter { !it.checked }
-    val done = items.filter { it.checked }
+    val now = remember(items) { System.currentTimeMillis() }
+    val arranged = remember(items, now) { StaleSort.arrange(items, now) }
+    val remaining = arranged.filter { !it.checked }
+    val done = arranged.filter { it.checked }
     val setupBroken = apps.isNotEmpty() && (!usage || !overlay)
 
     Box(Modifier.fillMaxSize()) {
@@ -142,7 +151,9 @@ fun HomeScreen(onOpenSettings: () -> Unit, vm: HomeViewModel = viewModel()) {
                             }
                             Spacer(Modifier.height(4.dp))
                         }
-                        items(remaining, key = { it.id }) { ItemRow(it, vm, onEdit = { editingId = it.id }) }
+                        items(remaining, key = { it.id }) {
+                            ItemRow(it, vm, tier = StaleSort.tierOf(it, now), onEdit = { editingId = it.id }, onTagTap = { keepCardId = it.id })
+                        }
                         if (done.isNotEmpty()) {
                             item {
                                 Row(Modifier.fillMaxWidth().padding(top = 18.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -154,7 +165,7 @@ fun HomeScreen(onOpenSettings: () -> Unit, vm: HomeViewModel = viewModel()) {
                                     )
                                 }
                             }
-                            items(done, key = { it.id }) { ItemRow(it, vm, onEdit = { editingId = it.id }) }
+                            items(done, key = { it.id }) { ItemRow(it, vm, tier = null, onEdit = { editingId = it.id }, onTagTap = {}) }
                         }
                     }
                 }
@@ -182,11 +193,20 @@ fun HomeScreen(onOpenSettings: () -> Unit, vm: HomeViewModel = viewModel()) {
                 onDelete = { vm.remove(editing); editingId = null },
             )
         }
+
+        if (keepCardItem != null) {
+            KeepCard(
+                item = keepCardItem,
+                tier = StaleSort.tierOf(keepCardItem, now) ?: StaleTier.Day,
+                onKeep = { vm.keepFresh(keepCardItem); keepCardId = null },
+                onDismiss = { keepCardId = null },
+            )
+        }
     }
 }
 
 @Composable
-private fun ItemRow(item: Item, vm: HomeViewModel, onEdit: () -> Unit) {
+private fun ItemRow(item: Item, vm: HomeViewModel, tier: StaleTier?, onEdit: () -> Unit, onTagTap: () -> Unit) {
     Column {
         Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
@@ -201,19 +221,56 @@ private fun ItemRow(item: Item, vm: HomeViewModel, onEdit: () -> Unit) {
                     null, Modifier.size(16.dp),
                 )
             }
-            Column(Modifier.weight(1f).tap(onClick = onEdit).padding(vertical = 4.dp)) {
-                Txt(
-                    item.name,
-                    TtoType.Body.copy(fontWeight = FontWeight.Normal, textDecoration = if (item.checked) TextDecoration.LineThrough else null),
-                    color = if (item.checked) TtoColor.Faint else TtoColor.Ink,
-                )
-                if (!item.note.isNullOrBlank()) {
-                    Txt(item.note, TtoType.BodySmall, color = if (item.checked) TtoColor.Faint else TtoColor.GraySecondary)
+            Row(Modifier.weight(1f).tap(onClick = onEdit).padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f, fill = false)) {
+                    Txt(
+                        item.name,
+                        TtoType.Body.copy(fontWeight = FontWeight.Normal, textDecoration = if (item.checked) TextDecoration.LineThrough else null),
+                        color = if (item.checked) TtoColor.Faint else TtoColor.Ink,
+                    )
+                    if (!item.note.isNullOrBlank()) {
+                        Txt(item.note, TtoType.BodySmall, color = if (item.checked) TtoColor.Faint else TtoColor.GraySecondary)
+                    }
+                }
+                if (tier != null) {
+                    Spacer(Modifier.size(8.dp))
+                    StaleTag(tier, onClick = onTagTap)
                 }
             }
             MinusButton({ vm.remove(item) }, "Remove ${item.name}")
         }
         HairlineRule()
+    }
+}
+
+@Composable
+private fun StaleTag(tier: StaleTier, onClick: () -> Unit) {
+    val (bg, text) = when (tier) {
+        StaleTier.Day -> TtoColor.StaleDaySoft to TtoColor.StaleDayText
+        StaleTier.ThreeDays -> TtoColor.StaleThreeSoft to TtoColor.StaleThreeText
+        StaleTier.Week -> TtoColor.StaleWeekSoft to TtoColor.StaleWeekText
+    }
+    Box(
+        Modifier.clip(TtoRadius.pill).background(bg)
+            .tap(onClick = onClick).semantics { contentDescription = "Been on the list for ${tier.label}. Tap to keep it." }
+            .padding(horizontal = 10.dp, vertical = 4.dp),
+    ) { Txt(tier.label, TtoType.Body.copy(fontSize = 12.sp, fontWeight = FontWeight.SemiBold), color = text) }
+}
+
+@Composable
+private fun KeepCard(item: Item, tier: StaleTier, onKeep: () -> Unit, onDismiss: () -> Unit) {
+    Box(Modifier.fillMaxSize().background(Color(0x6B171717)).tap(onClick = onDismiss), contentAlignment = Alignment.Center) {
+        Column(
+            Modifier.padding(horizontal = 32.dp).fillMaxWidth()
+                .clip(TtoRadius.lg).background(TtoColor.Paper).tap { }.padding(20.dp),
+        ) {
+            Txt("${item.name}'s been here ${tier.label}", TtoType.SectionTitle)
+            Txt("Still need it?", TtoType.Body.copy(fontWeight = FontWeight.Normal), Modifier.padding(top = 4.dp), color = TtoColor.GrayBody)
+            Box(
+                Modifier.padding(top = 16.dp).fillMaxWidth().clip(TtoRadius.md).background(TtoColor.Ink).tap(onClick = onKeep).padding(vertical = 14.dp),
+                contentAlignment = Alignment.Center,
+            ) { Txt("Keep", TtoType.Button, color = Color.White) }
+        }
     }
 }
 
