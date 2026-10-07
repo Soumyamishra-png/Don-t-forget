@@ -274,7 +274,7 @@ private fun MinimizedPill(context: Context, state: WidgetMascotState, copy: Widg
     val textColor = if (state.faceIsLight) 0xFFFFFFFF.toInt() else 0xFF171717.toInt()
     val iconTint = if (state.faceIsLight) Color.White else Ink
     Row(
-        GlanceModifier.fillMaxWidth().height(52.dp).background(ImageProvider(pillDrawable(state)))
+        GlanceModifier.fillMaxWidth().height(60.dp).background(ImageProvider(pillDrawable(state)))
             .padding(start = 18.dp, end = 12.dp).clickable(actionRunCallback<ToggleMinimizeAction>()),
         verticalAlignment = Alignment.CenterVertically,
     ) {
