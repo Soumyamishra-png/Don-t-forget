@@ -65,4 +65,10 @@ class VoiceParserTest {
     fun multiWordHindiPhrasesTranslate() {
         assertEquals(listOf(ParsedItem("Capsicum", "1 kg")), p("ek kilo shimla mirch"))
     }
+
+    @Test
+    fun spokenHindiCountsWithoutAUnit() {
+        assertEquals(listOf(ParsedItem("Eggs", "4")), p("char eggs"))
+        assertEquals(listOf(ParsedItem("Milk", "1 pack")), p("ek packet dudh"))
+    }
 }

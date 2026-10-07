@@ -19,8 +19,8 @@ object VoiceParser {
         "nau" to 9.0, "das" to 10.0, "aadha" to 0.5, "adha" to 0.5, "dedh" to 1.5, "dhai" to 2.5,
     )
 
-    // Hindi words that are also common words or sounds, so they only count as a number when a unit follows.
-    private val needsUnit = setOf("ek", "do", "char", "chaar", "das", "nau", "saat")
+    // Hindi words that are also English words, so they only count as a number when a unit follows.
+    private val needsUnit = setOf("do")
 
     private val units = mapOf(
         "kg" to "kg", "kgs" to "kg", "kilo" to "kg", "kilos" to "kg", "kilogram" to "kg", "kilograms" to "kg",
@@ -76,7 +76,7 @@ object VoiceParser {
 
 object HindiGroceries {
     private val words = mapOf(
-        "doodh" to "Milk", "dahi" to "Curd", "chawal" to "Rice", "aloo" to "Potatoes", "alu" to "Potatoes",
+        "doodh" to "Milk", "dudh" to "Milk", "dood" to "Milk", "pyaj" to "Onions", "dahi" to "Curd", "chawal" to "Rice", "aloo" to "Potatoes", "alu" to "Potatoes",
         "pyaaz" to "Onions", "pyaz" to "Onions", "tamatar" to "Tomatoes", "adrak" to "Ginger",
         "lehsun" to "Garlic", "lahsun" to "Garlic", "mirch" to "Chilli", "dhania" to "Coriander",
         "nimbu" to "Lemon", "kela" to "Bananas", "kele" to "Bananas", "seb" to "Apples",

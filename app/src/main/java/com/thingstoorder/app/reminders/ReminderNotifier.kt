@@ -11,10 +11,14 @@ import com.thingstoorder.app.R
 import com.thingstoorder.app.data.Item
 import com.thingstoorder.app.permissions.Permissions
 
+private const val VOICE_ACTIVITY = "com.thingstoorder.app.widget.VoiceAddActivity"
+
 object ReminderNotifier {
     const val ACTION_SNOOZE = "com.thingstoorder.app.action.SNOOZE_REMINDER"
     const val NOTIFICATION_ID = 2
+    const val ADD_PROMPT_ID = 3
     private const val CHANNEL_ID = "reminders"
+    private const val ADD_CHANNEL_ID = "add_prompt_v2"
 
     fun post(context: Context, remaining: List<Item>) {
         val allowed = Permissions.notificationsGranted(context)
@@ -56,9 +60,44 @@ object ReminderNotifier {
             .addAction(0, "Snooze 1h", snooze)
             .build()
         manager.notify(NOTIFICATION_ID, notification)
+        postAddPrompt(context, manager, snooze)
+    }
+
+    /** Quiet companion to the reminder: "Say it" opens the voice sheet, even over the lock screen. */
+    private fun postAddPrompt(context: Context, manager: NotificationManager, snooze: PendingIntent) {
+        if (manager.getNotificationChannel(ADD_CHANNEL_ID) == null) {
+            manager.createNotificationChannel(
+                NotificationChannel(ADD_CHANNEL_ID, "Add by voice", NotificationManager.IMPORTANCE_DEFAULT).apply {
+                    setSound(null, null)
+                    enableVibration(false)
+                    description = "A quiet prompt to add anything you forgot, by voice."
+                    lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
+                },
+            )
+        }
+        val sayIt = PendingIntent.getActivity(
+            context, 2,
+            Intent().setClassName(context.packageName, VOICE_ACTIVITY).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+            PendingIntent.FLAG_IMMUTABLE,
+        )
+        val notification = NotificationCompat.Builder(context, ADD_CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_stat_watch)
+            .setColor(0xFFFF5E1A.toInt())
+            .setContentTitle("Things to Order")
+            .setContentText("Anything to add before you order?")
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setOnlyAlertOnce(true)
+            .setAutoCancel(true)
+            .setContentIntent(sayIt)
+            .addAction(NotificationCompat.Action.Builder(0, "Say it", sayIt).setAuthenticationRequired(false).build())
+            .addAction(0, "Snooze 1h", snooze)
+            .build()
+        manager.notify(ADD_PROMPT_ID, notification)
     }
 
     fun cancel(context: Context) {
-        context.getSystemService(NotificationManager::class.java).cancel(NOTIFICATION_ID)
+        val manager = context.getSystemService(NotificationManager::class.java)
+        manager.cancel(NOTIFICATION_ID)
+        manager.cancel(ADD_PROMPT_ID)
     }
 }
