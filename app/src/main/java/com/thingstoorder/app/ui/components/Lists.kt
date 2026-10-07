@@ -99,7 +99,7 @@ fun PrivacyCard() {
     ) {
         PrivacyRow(R.drawable.icon_checkbox_ticked, "What we check", "Whether Blinkit, Zepto or another app you picked is on screen.")
         Box(Modifier.fillMaxWidth().height(1.dp).background(TtoColor.Line))
-        PrivacyRow(R.drawable.icon_cross, "What we never do", "Read what you browse, buy or type. Nothing leaves your phone.")
+        PrivacyRow(R.drawable.icon_cross, "What we never do", "Read what you browse, buy or type. Your list stays on your phone. If you use the mic, your phone's speech service may process what you say.")
     }
 }
 

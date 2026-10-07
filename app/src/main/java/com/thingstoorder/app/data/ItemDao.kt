@@ -45,6 +45,9 @@ interface ItemDao {
     @Query("DELETE FROM items WHERE checked = 1")
     suspend fun clearChecked()
 
+    @Query("UPDATE items SET quantity = :quantity WHERE id = :id")
+    suspend fun setQuantity(id: Long, quantity: String?)
+
     @Query("UPDATE items SET staleResetAt = :at WHERE id = :id")
     suspend fun keepFresh(id: Long, at: Long)
 }

@@ -8,15 +8,19 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.thingstoorder.app.voice.VoiceSheet
+import com.thingstoorder.app.voice.rememberVoiceController
 
 @Composable
 fun OnboardingHost(onFinished: () -> Unit, vm: OnboardingViewModel = viewModel()) {
     BackHandler(enabled = vm.canGoBack) { vm.back() }
+    val voice = rememberVoiceController()
+    Box(Modifier.fillMaxSize()) {
     Box(Modifier.fillMaxSize().systemBarsPadding().imePadding()) {
     when (vm.step) {
         Step.Welcome -> WelcomeScreen(vm)
         Step.HowItWorks -> HowItWorksScreen(vm)
-        Step.AddItems -> AddItemsScreen(vm)
+        Step.AddItems -> AddItemsScreen(vm, voice)
         Step.Reminder -> ReminderScreen(vm)
         Step.Widget -> WidgetScreen(vm)
         Step.Notifications -> NotificationsScreen(vm)
@@ -25,5 +29,7 @@ fun OnboardingHost(onFinished: () -> Unit, vm: OnboardingViewModel = viewModel()
         Step.Overlay -> OverlayScreen(vm)
         Step.AllSet -> AllSetScreen(vm, onFinished)
     }
+    }
+    if (vm.step == Step.AddItems) VoiceSheet(voice, onAdd = vm::addVoice)
     }
 }

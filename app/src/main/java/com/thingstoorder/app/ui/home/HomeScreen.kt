@@ -69,6 +69,10 @@ import com.thingstoorder.app.ui.components.tap
 import com.thingstoorder.app.ui.theme.TtoColor
 import com.thingstoorder.app.ui.theme.TtoRadius
 import com.thingstoorder.app.ui.theme.TtoType
+import com.thingstoorder.app.voice.MicButton
+import com.thingstoorder.app.voice.VoiceSheet
+import com.thingstoorder.app.voice.rememberVoiceController
+import kotlinx.coroutines.delay
 
 @Composable
 fun HomeScreen(onOpenSettings: () -> Unit, vm: HomeViewModel = viewModel()) {
@@ -79,6 +83,10 @@ fun HomeScreen(onOpenSettings: () -> Unit, vm: HomeViewModel = viewModel()) {
     val overlay by rememberPermissionState(Permissions::overlayGranted)
 
     var text by rememberSaveable { mutableStateOf("") }
+    var typing by rememberSaveable { mutableStateOf(false) }
+    var voiceNote by remember { mutableStateOf<String?>(null) }
+    val voice = rememberVoiceController()
+    LaunchedEffect(voiceNote) { if (voiceNote != null) { delay(3500); voiceNote = null } }
     var editingId by rememberSaveable { mutableStateOf<Long?>(null) }
     var keepCardId by rememberSaveable { mutableStateOf<Long?>(null) }
     val editing = items.firstOrNull { it.id == editingId }
@@ -127,13 +135,29 @@ fun HomeScreen(onOpenSettings: () -> Unit, vm: HomeViewModel = viewModel()) {
                 }
             }
 
-            AddField(
-                value = text,
-                onValueChange = { text = it },
-                onSubmit = { if (vm.add(text)) text = "" },
-                placeholder = "Add something…",
-                modifier = Modifier.padding(top = if (setupBroken) 14.dp else 18.dp),
-            )
+            Column(Modifier.fillMaxWidth().padding(top = if (setupBroken) 14.dp else 18.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                MicButton(onClick = voice.begin, size = 72)
+                Txt("Say what you need", TtoType.Body.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold), Modifier.padding(top = 10.dp))
+                if (!typing && text.isEmpty()) {
+                    Txt(
+                        "or type instead",
+                        TtoType.Body.copy(fontSize = 13.sp, fontWeight = FontWeight.Normal, textDecoration = TextDecoration.Underline),
+                        Modifier.tap { typing = true }.padding(8.dp), color = TtoColor.GrayBody,
+                    )
+                }
+                if (voiceNote != null) {
+                    Txt(voiceNote!!, TtoType.BodySmall, Modifier.padding(top = 4.dp), color = TtoColor.OrangeText, align = TextAlign.Center)
+                }
+            }
+            if (typing || text.isNotEmpty()) {
+                AddField(
+                    value = text,
+                    onValueChange = { text = it },
+                    onSubmit = { if (vm.add(text)) text = "" },
+                    placeholder = "Add something…",
+                    modifier = Modifier.padding(top = 12.dp),
+                )
+            }
 
             Column(Modifier.weight(1f).fillMaxWidth()) {
                 when {
@@ -185,6 +209,16 @@ fun HomeScreen(onOpenSettings: () -> Unit, vm: HomeViewModel = viewModel()) {
             )
         }
 
+        VoiceSheet(voice, onAdd = { parsed ->
+            vm.addVoice(parsed) { skipped ->
+                voiceNote = when (skipped.size) {
+                    0 -> null
+                    1 -> "${skipped[0]} is already there"
+                    else -> "${skipped.joinToString()} are already there"
+                }
+            }
+        })
+
         if (editing != null) {
             EditSheet(
                 item = editing,
@@ -231,6 +265,10 @@ private fun ItemRow(item: Item, vm: HomeViewModel, tier: StaleTier?, onEdit: () 
                     if (!item.note.isNullOrBlank()) {
                         Txt(item.note, TtoType.BodySmall, color = if (item.checked) TtoColor.Faint else TtoColor.GraySecondary)
                     }
+                }
+                if (item.quantity != null) {
+                    Spacer(Modifier.size(8.dp))
+                    Txt(item.quantity, TtoType.Body.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold), color = if (item.checked) TtoColor.Faint else TtoColor.OrangeText)
                 }
                 if (tier != null) {
                     Spacer(Modifier.size(8.dp))

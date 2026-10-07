@@ -10,6 +10,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.thingstoorder.app.data.AppDatabase
 import com.thingstoorder.app.data.Item
+import com.thingstoorder.app.voice.ParsedItem
 import com.thingstoorder.app.data.OnboardingResult
 import com.thingstoorder.app.data.QcApp
 import com.thingstoorder.app.data.ReminderMode
@@ -25,7 +26,7 @@ class OnboardingViewModel(app: Application) : AndroidViewModel(app) {
         private set
     val canGoBack: Boolean get() = history.isNotEmpty()
 
-    val draftItems = mutableStateListOf<String>()
+    val draftItems = mutableStateListOf<ParsedItem>()
     var listSaved by mutableStateOf(false)
 
     var reminder by mutableStateOf<ReminderMode?>(null)
@@ -50,8 +51,17 @@ class OnboardingViewModel(app: Application) : AndroidViewModel(app) {
     fun addItem(name: String): Boolean {
         val clean = name.trim()
         if (clean.isEmpty()) return false
-        draftItems.add(clean)
+        draftItems.add(ParsedItem(clean, null))
         return true
+    }
+
+    /** Voice items; a name already in the draft is not added twice (its quantity is updated if a new one was spoken). */
+    fun addVoice(parsed: List<ParsedItem>) {
+        for (p in parsed) {
+            val at = draftItems.indexOfFirst { it.name.equals(p.name, ignoreCase = true) }
+            if (at < 0) draftItems.add(p)
+            else if (p.quantity != null) draftItems[at] = draftItems[at].copy(quantity = p.quantity)
+        }
     }
 
     fun removeItem(index: Int) {
@@ -99,7 +109,7 @@ class OnboardingViewModel(app: Application) : AndroidViewModel(app) {
             val context = getApplication<Application>()
             if (listSaved && draftItems.isNotEmpty()) {
                 val dao = AppDatabase.get(context).itemDao()
-                draftItems.forEach { dao.insert(Item(name = it)) }
+                draftItems.forEach { dao.insert(Item(name = it.name, quantity = it.quantity)) }
             }
             SettingsRepository(context).completeOnboarding(
                 OnboardingResult(

@@ -53,6 +53,8 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.thingstoorder.app.voice.MicButton
+import com.thingstoorder.app.voice.VoiceController
 import com.thingstoorder.app.R
 import com.thingstoorder.app.data.QcApp
 import com.thingstoorder.app.data.ReminderMode
@@ -156,17 +158,24 @@ private fun PopupCard(chips: List<String>, modifier: Modifier = Modifier) {
 
 // 03
 @Composable
-fun AddItemsScreen(vm: OnboardingViewModel) = StepColumn(dots = 3) {
+fun AddItemsScreen(vm: OnboardingViewModel, voice: VoiceController) = StepColumn(dots = 3) {
     var text by rememberSaveable { mutableStateOf("") }
     val submit = { if (vm.addItem(text)) text = "" }
 
     Headline("What's running low?")
+    if (vm.draftItems.isEmpty()) {
+        Column(Modifier.padding(top = 22.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+            MicButton(onClick = voice.begin, size = 72)
+            Txt("Tap and say it", TtoType.Body.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold), Modifier.padding(top = 10.dp))
+            Txt("Hindi words are fine too", TtoType.BodySmall, Modifier.padding(top = 2.dp), color = TtoColor.GraySecondary)
+        }
+    }
     Row(
-        Modifier.padding(top = 22.dp).fillMaxWidth().border(1.5.dp, TtoColor.Ink, TtoRadius.md).padding(horizontal = 16.dp, vertical = 14.dp),
+        Modifier.padding(top = if (vm.draftItems.isEmpty()) 18.dp else 22.dp).fillMaxWidth().border(1.5.dp, TtoColor.Ink, TtoRadius.md).padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(Modifier.weight(1f)) {
-            if (text.isEmpty()) Txt("Type an item…", TtoType.Body.copy(fontWeight = FontWeight.Normal), color = TtoColor.Faint)
+            if (text.isEmpty()) Txt(if (vm.draftItems.isEmpty()) "or type an item…" else "Type an item…", TtoType.Body.copy(fontWeight = FontWeight.Normal), color = TtoColor.Faint)
             BasicTextField(
                 value = text,
                 onValueChange = { text = it },
@@ -192,17 +201,24 @@ fun AddItemsScreen(vm: OnboardingViewModel) = StepColumn(dots = 3) {
         }
     } else {
         LazyColumn(Modifier.weight(1f).padding(top = 18.dp)) {
-            itemsIndexed(vm.draftItems) { index, name ->
+            itemsIndexed(vm.draftItems) { index, draft ->
                 Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Image(painterResource(R.drawable.icon_checkbox_empty), null, Modifier.size(16.dp))
-                    Txt(name, TtoType.Body.copy(fontWeight = FontWeight.Normal), Modifier.weight(1f))
+                    Txt(draft.name, TtoType.Body.copy(fontWeight = FontWeight.Normal), Modifier.weight(1f))
+                    if (draft.quantity != null) Txt(draft.quantity, TtoType.Body.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold), color = TtoColor.OrangeText)
                     MinusMark { vm.removeItem(index) }
                 }
                 Rule()
             }
         }
     }
-    StepFooter("Save list", primaryEnabled = vm.draftItems.isNotEmpty(), onPrimary = vm::saveList, onNotNow = vm::skipList)
+    if (vm.draftItems.isNotEmpty()) {
+        Box(
+            Modifier.padding(bottom = 8.dp).fillMaxWidth().clip(TtoRadius.md).border(1.5.dp, TtoColor.Ink, TtoRadius.md).tap(onClick = voice.begin).padding(vertical = 14.dp),
+            contentAlignment = Alignment.Center,
+        ) { Txt("Say more", TtoType.Button) }
+    }
+    StepFooter("Next", primaryEnabled = vm.draftItems.isNotEmpty(), onPrimary = vm::saveList, onNotNow = vm::skipList)
 }
 
 // 04

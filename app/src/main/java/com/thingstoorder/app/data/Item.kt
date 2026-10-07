@@ -13,4 +13,6 @@ data class Item(
     // Reset to "now" when the user taps Keep on a stale item; staleness age is measured
     // from this if set, otherwise from createdAt.
     val staleResetAt: Long? = null,
+    // Normalized short form such as "2 L" or "5 kg"; set by voice input.
+    val quantity: String? = null,
 )
