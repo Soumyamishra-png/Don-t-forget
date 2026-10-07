@@ -214,12 +214,6 @@ private fun Expanded(context: Context, items: List<Item>, remaining: Int, state:
                     BitmapText(WidgetBitmaps.badge(context, remaining), "$remaining to order")
                 }
             }
-            Text(
-                copy.caption,
-                modifier = GlanceModifier.padding(top = 2.dp),
-                style = TextStyle(color = ColorProvider(GrayBody), fontSize = 12.sp),
-                maxLines = 1,
-            )
             if (items.isEmpty()) {
                 EmptyBody()
             } else {
@@ -256,7 +250,7 @@ private fun ItemRow(item: Item) {
                 GlanceModifier.size(width = 40.dp, height = 38.dp)
                     .clickable(actionRunCallback<RemoveItemAction>(actionParametersOf(ItemIdKey to item.id))),
                 contentAlignment = Alignment.CenterEnd,
-            ) { Icon(R.drawable.icon_subtract, 14, description = "Remove ${item.name}") }
+            ) { Icon(R.drawable.icon_minus, 18, description = "Remove ${item.name}") }
         }
         Box(GlanceModifier.fillMaxWidth().height(1.dp).background(ColorProvider(Line))) {}
     }
@@ -285,8 +279,8 @@ private fun MinimizedPill(context: Context, state: WidgetMascotState, copy: Widg
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(state.face, PILL_FACE_DP, description = null)
-        Spacer(GlanceModifier.width(8.dp))
-        BitmapText(WidgetBitmaps.text(context, copy.pillLabel, 15f, textColor), copy.pillLabel)
+        Spacer(GlanceModifier.width(14.dp))
+        BitmapText(WidgetBitmaps.text(context, copy.pillLabel, 17f, textColor), copy.pillLabel)
         Spacer(GlanceModifier.defaultWeight())
         Icon(R.drawable.icon_chevron_up, 18, tint = iconTint, description = "Expand")
     }

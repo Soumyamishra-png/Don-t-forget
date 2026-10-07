@@ -48,7 +48,7 @@ fun MinusButton(onClick: () -> Unit, description: String = "Remove") {
         Modifier.size(36.dp).tap(onClick = onClick).semantics { contentDescription = description; role = Role.Button },
         contentAlignment = Alignment.CenterEnd,
     ) {
-        Box(Modifier.width(10.dp).height(1.6.dp).background(TtoColor.Ink))
+        Image(painterResource(R.drawable.icon_minus), null, Modifier.size(14.dp))
     }
 }
 
