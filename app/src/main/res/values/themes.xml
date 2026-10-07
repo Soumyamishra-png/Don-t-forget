@@ -8,6 +8,10 @@
         <item name="android:forceDarkAllowed">false</item>
     </style>
 
+    <style name="Theme.ThingsToOrder.VoiceAdd" parent="Theme.ThingsToOrder.QuickAdd">
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+
     <style name="Theme.ThingsToOrder.QuickAdd" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>

@@ -7,6 +7,7 @@ import com.thingstoorder.app.data.AppDatabase
 import com.thingstoorder.app.data.Item
 import com.thingstoorder.app.data.SettingsRepository
 import com.thingstoorder.app.voice.ParsedItem
+import com.thingstoorder.app.voice.addParsed
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -26,23 +27,9 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     }
 
 
-    /** Adds spoken items. Names already on the list are skipped (quantity updated when a new one is given); returns the skipped names. */
+    /** Adds spoken items; returns the names that were already on the list. */
     fun addVoice(parsed: List<ParsedItem>, onDone: (skipped: List<String>) -> Unit) {
-        viewModelScope.launch {
-            val existing = dao.getRemaining().toMutableList()
-            val skipped = mutableListOf<String>()
-            for (p in parsed) {
-                val match = existing.firstOrNull { it.name.equals(p.name, ignoreCase = true) }
-                if (match != null) {
-                    skipped += match.name
-                    if (p.quantity != null) dao.setQuantity(match.id, p.quantity)
-                } else {
-                    val id = dao.insert(Item(name = p.name, quantity = p.quantity))
-                    existing += Item(id = id, name = p.name, quantity = p.quantity)
-                }
-            }
-            onDone(skipped.distinct())
-        }
+        viewModelScope.launch { onDone(dao.addParsed(parsed)) }
     }
 
     fun toggle(item: Item) {

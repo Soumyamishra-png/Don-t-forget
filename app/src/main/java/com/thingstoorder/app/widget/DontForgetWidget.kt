@@ -53,6 +53,7 @@ import kotlinx.coroutines.flow.first
 private val Ink = Color(0xFF171717)
 private val Line = Color(0xFFEDEAE1)
 private val Faint = Color(0xFFB7B2A6)
+private val QtyColor = Color(0xFFC24A00)
 private val GrayBody = Color(0xFF6E6B64)
 private val Orange = Color(0xFFFF5E1A)
 
@@ -102,17 +103,24 @@ class ToggleMinimizeAction : ActionCallback {
     }
 }
 
-// Dismisses the full-color takeover and opens quick-add in one tap, same destination as the
-// regular "+" (there's no dedicated "Typing" screen yet -- that's the Voice phase).
+// Dismisses the full-color takeover and opens the voice sheet in one tap.
 class DismissTakeoverAction : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
         SettingsRepository(context).setWidgetTakeoverUntil(null)
         DontForgetWidget().updateAll(context)
-        context.startActivity(
-            Intent().setClassName("com.thingstoorder.app", QuickAddActivity::class.java.name)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-        )
+        openVoice(context)
     }
+}
+
+private fun openVoice(context: Context) {
+    context.startActivity(
+        Intent().setClassName("com.thingstoorder.app", VoiceAddActivity::class.java.name)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+    )
+}
+
+class VoiceFromWidgetAction : ActionCallback {
+    override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) = openVoice(context)
 }
 
 @Composable
@@ -221,8 +229,21 @@ private fun Expanded(context: Context, items: List<Item>, remaining: Int, state:
                 LazyColumn(GlanceModifier.fillMaxWidth().defaultWeight()) {
                     items(items, itemId = { it.id }) { ItemRow(it) }
                 }
+                MicRow()
             }
         }
+    }
+}
+
+@Composable
+private fun MicRow() {
+    Row(
+        GlanceModifier.fillMaxWidth().height(40.dp).clickable(actionRunCallback<VoiceFromWidgetAction>()),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(R.drawable.icon_mic, 18, description = null)
+        Spacer(GlanceModifier.width(10.dp))
+        Text("Tap to say it", style = TextStyle(color = ColorProvider(Ink), fontSize = 15.sp, fontWeight = FontWeight.Medium), maxLines = 1)
     }
 }
 
@@ -246,6 +267,14 @@ private fun ItemRow(item: Item) {
                 ),
                 maxLines = 1,
             )
+            if (item.quantity != null) {
+                Text(
+                    item.quantity,
+                    modifier = GlanceModifier.padding(start = 6.dp),
+                    style = TextStyle(color = ColorProvider(if (item.checked) Faint else QtyColor), fontSize = 13.sp, fontWeight = FontWeight.Medium),
+                    maxLines = 1,
+                )
+            }
             Box(
                 GlanceModifier.size(width = 40.dp, height = 38.dp)
                     .clickable(actionRunCallback<RemoveItemAction>(actionParametersOf(ItemIdKey to item.id))),
