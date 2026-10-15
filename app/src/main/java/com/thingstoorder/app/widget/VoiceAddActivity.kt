@@ -11,10 +11,9 @@ import androidx.compose.runtime.setValue
 import androidx.core.view.WindowCompat
 import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.lifecycleScope
-import com.thingstoorder.app.data.AppDatabase
+import com.thingstoorder.app.data.ItemStore
 import com.thingstoorder.app.voice.VoiceSheet
 import com.thingstoorder.app.voice.VoiceState
-import com.thingstoorder.app.voice.addParsed
 import com.thingstoorder.app.voice.rememberVoiceController
 import kotlinx.coroutines.launch
 
@@ -23,7 +22,7 @@ class VoiceAddActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        val dao = AppDatabase.get(this).itemDao()
+        val store = ItemStore(this)
 
         setContent {
             val voice = rememberVoiceController()
@@ -39,7 +38,7 @@ class VoiceAddActivity : ComponentActivity() {
 
             VoiceSheet(voice, onAdd = { parsed ->
                 lifecycleScope.launch {
-                    dao.addParsed(parsed)
+                    store.addParsed(parsed)
                     DontForgetWidget().updateAll(applicationContext)
                     finish()
                 }

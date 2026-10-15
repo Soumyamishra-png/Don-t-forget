@@ -15,4 +15,7 @@ data class Item(
     val staleResetAt: Long? = null,
     // Normalized short form such as "2 L" or "5 kg"; set by voice input.
     val quantity: String? = null,
+    // Shared list: Firestore document id and the uid of whoever added it. Both null on a local-only list.
+    val remoteId: String? = null,
+    val addedBy: String? = null,
 )

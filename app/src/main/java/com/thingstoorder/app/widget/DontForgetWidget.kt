@@ -46,6 +46,7 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.thingstoorder.app.R
 import com.thingstoorder.app.data.AppDatabase
+import com.thingstoorder.app.data.ItemStore
 import com.thingstoorder.app.data.Item
 import com.thingstoorder.app.data.SettingsRepository
 import kotlinx.coroutines.flow.first
@@ -83,14 +84,14 @@ class DontForgetWidgetReceiver : GlanceAppWidgetReceiver() {
 
 class ToggleItemAction : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
-        parameters[ItemIdKey]?.let { AppDatabase.get(context).itemDao().toggleChecked(it) }
+        parameters[ItemIdKey]?.let { ItemStore(context).toggle(it) }
         DontForgetWidget().updateAll(context)
     }
 }
 
 class RemoveItemAction : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
-        parameters[ItemIdKey]?.let { AppDatabase.get(context).itemDao().deleteById(it) }
+        parameters[ItemIdKey]?.let { ItemStore(context).remove(it) }
         DontForgetWidget().updateAll(context)
     }
 }

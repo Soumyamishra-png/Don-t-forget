@@ -51,6 +51,30 @@ class SettingsRepository(private val context: Context) {
         val pillX = intPreferencesKey("pill_x")
         val pillY = intPreferencesKey("pill_y")
         val widgetTakeoverUntil = longPreferencesKey("widget_takeover_until")
+        val sharedListId = stringPreferencesKey("shared_list_id")
+        val sharedCode = stringPreferencesKey("shared_code")
+        val myName = stringPreferencesKey("my_name")
+        val orderBannerSeen = longPreferencesKey("order_banner_seen")
+    }
+
+    val sharedListId: Flow<String?> = context.settingsStore.data.map { it[Keys.sharedListId] }
+    val sharedCode: Flow<String?> = context.settingsStore.data.map { it[Keys.sharedCode] }
+    val myName: Flow<String?> = context.settingsStore.data.map { it[Keys.myName] }
+    val orderBannerSeen: Flow<Long> = context.settingsStore.data.map { it[Keys.orderBannerSeen] ?: 0L }
+
+    suspend fun setShared(listId: String?, code: String?) {
+        context.settingsStore.edit { p: androidx.datastore.preferences.core.MutablePreferences ->
+            if (listId == null) p.remove(Keys.sharedListId) else p[Keys.sharedListId] = listId
+            if (code == null) p.remove(Keys.sharedCode) else p[Keys.sharedCode] = code
+        }
+    }
+
+    suspend fun setMyName(name: String) {
+        context.settingsStore.edit { it[Keys.myName] = name }
+    }
+
+    suspend fun setOrderBannerSeen(at: Long) {
+        context.settingsStore.edit { it[Keys.orderBannerSeen] = at }
     }
 
     val widgetTakeoverUntil: Flow<Long?> = context.settingsStore.data.map { it[Keys.widgetTakeoverUntil] }

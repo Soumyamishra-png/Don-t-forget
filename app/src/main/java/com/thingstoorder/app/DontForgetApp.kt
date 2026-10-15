@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.glance.appwidget.updateAll
 import com.thingstoorder.app.data.AppDatabase
 import com.thingstoorder.app.data.SettingsRepository
+import com.thingstoorder.app.data.shared.SharedLists
 import com.thingstoorder.app.overlay.OverlayController
 import com.thingstoorder.app.reminders.ReminderScheduler
 import com.thingstoorder.app.watcher.WatcherController
@@ -24,6 +25,7 @@ class DontForgetApp : Application() {
     @OptIn(FlowPreview::class)
     override fun onCreate() {
         super.onCreate()
+        SharedLists.get(this).start()
         WatcherController.start(this, appScope)
         OverlayController.start(this)
 

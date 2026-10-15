@@ -18,6 +18,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.thingstoorder.app.data.AppDatabase
+import com.thingstoorder.app.data.ItemStore
 import com.thingstoorder.app.data.Item
 import com.thingstoorder.app.data.QcApp
 import com.thingstoorder.app.data.SettingsRepository
@@ -143,7 +144,7 @@ object OverlayController {
         if (testing) {
             items.value = items.value.filter { it.id != item.id }
         } else {
-            scope.launch(Dispatchers.IO) { dao.setChecked(item.id, true) }
+            scope.launch(Dispatchers.IO) { ItemStore(app).setChecked(item.id, true) }
         }
     }
 

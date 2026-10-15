@@ -69,6 +69,8 @@ import com.thingstoorder.app.ui.components.tap
 import com.thingstoorder.app.ui.theme.TtoColor
 import com.thingstoorder.app.ui.theme.TtoRadius
 import com.thingstoorder.app.ui.theme.TtoType
+import com.thingstoorder.app.ui.shared.SharePill
+import com.thingstoorder.app.ui.shared.ShareSheet
 import com.thingstoorder.app.voice.MicButton
 import com.thingstoorder.app.voice.VoiceSheet
 import com.thingstoorder.app.voice.rememberVoiceController
@@ -79,6 +81,11 @@ fun HomeScreen(onOpenSettings: () -> Unit, vm: HomeViewModel = viewModel()) {
     val context = LocalContext.current
     val items by vm.items.collectAsStateWithLifecycle()
     val apps by vm.watchedApps.collectAsStateWithLifecycle()
+    val shared by vm.shared.collectAsStateWithLifecycle()
+    val bannerSeen by vm.bannerSeen.collectAsStateWithLifecycle()
+    var shareOpen by rememberSaveable { mutableStateOf(false) }
+    val colorOf = remember(shared) { shared?.members?.associate { it.uid to it.color } ?: emptyMap() }
+    val order = shared?.lastOrder?.takeIf { it.at > bannerSeen && it.byUid != vm.myUid }
     val usage by rememberPermissionState(Permissions::usageAccessGranted)
     val overlay by rememberPermissionState(Permissions::overlayGranted)
 
@@ -92,9 +99,10 @@ fun HomeScreen(onOpenSettings: () -> Unit, vm: HomeViewModel = viewModel()) {
     val editing = items.firstOrNull { it.id == editingId }
     val keepCardItem = items.firstOrNull { it.id == keepCardId }
 
-    BackHandler(enabled = editing != null || keepCardItem != null) {
+    BackHandler(enabled = editing != null || keepCardItem != null || shareOpen) {
         editingId = null
         keepCardId = null
+        shareOpen = false
     }
 
     val now = remember(items) { System.currentTimeMillis() }
@@ -107,6 +115,7 @@ fun HomeScreen(onOpenSettings: () -> Unit, vm: HomeViewModel = viewModel()) {
         Column(Modifier.fillMaxSize().systemBarsPadding().imePadding().padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Txt("Don't Forget", TtoType.ScreenTitle, Modifier.weight(1f))
+                SharePill(onClick = { shareOpen = true }, members = shared?.members?.map { it.color }.orEmpty(), modifier = Modifier.padding(end = 10.dp))
                 Box(Modifier.size(40.dp).tap(onClick = onOpenSettings), contentAlignment = Alignment.CenterEnd) {
                     Image(painterResource(R.drawable.icon_settings), "Settings", Modifier.size(22.dp))
                 }
@@ -135,6 +144,19 @@ fun HomeScreen(onOpenSettings: () -> Unit, vm: HomeViewModel = viewModel()) {
                 }
             }
 
+            if (order != null) {
+                Row(
+                    Modifier.padding(top = 12.dp).fillMaxWidth().clip(TtoRadius.pill).background(Color(0xFFE8F7EF))
+                        .tap { vm.dismissBanner(order.at) }.padding(horizontal = 14.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Box(Modifier.size(8.dp).clip(androidx.compose.foundation.shape.CircleShape).background(Color(0xFF2FB67C)))
+                    Txt(
+                        "${order.byName.ifBlank { "Someone" }} ordered ${order.count} ${if (order.count == 1) "item" else "items"} · cleared",
+                        TtoType.Body.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold), Modifier.padding(start = 10.dp),
+                    )
+                }
+            }
             Column(Modifier.fillMaxWidth().padding(top = if (setupBroken) 14.dp else 18.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 MicButton(onClick = voice.begin, size = 72)
                 Txt("Say what you need", TtoType.Body.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold), Modifier.padding(top = 10.dp))
@@ -176,7 +198,7 @@ fun HomeScreen(onOpenSettings: () -> Unit, vm: HomeViewModel = viewModel()) {
                             Spacer(Modifier.height(4.dp))
                         }
                         items(remaining, key = { it.id }) {
-                            ItemRow(it, vm, tier = StaleSort.tierOf(it, now), onEdit = { editingId = it.id }, onTagTap = { keepCardId = it.id })
+                            ItemRow(it, vm, dot = colorOf[it.addedBy], tier = StaleSort.tierOf(it, now), onEdit = { editingId = it.id }, onTagTap = { keepCardId = it.id })
                         }
                         if (done.isNotEmpty()) {
                             item {
@@ -189,7 +211,7 @@ fun HomeScreen(onOpenSettings: () -> Unit, vm: HomeViewModel = viewModel()) {
                                     )
                                 }
                             }
-                            items(done, key = { it.id }) { ItemRow(it, vm, tier = null, onEdit = { editingId = it.id }, onTagTap = {}) }
+                            items(done, key = { it.id }) { ItemRow(it, vm, dot = colorOf[it.addedBy], tier = null, onEdit = { editingId = it.id }, onTagTap = {}) }
                         }
                     }
                 }
@@ -208,6 +230,8 @@ fun HomeScreen(onOpenSettings: () -> Unit, vm: HomeViewModel = viewModel()) {
                 color = TtoColor.GrayBody,
             )
         }
+
+        if (shareOpen) ShareSheet(onDismiss = { shareOpen = false })
 
         VoiceSheet(voice, onAdd = { parsed ->
             vm.addVoice(parsed) { skipped ->
@@ -240,7 +264,7 @@ fun HomeScreen(onOpenSettings: () -> Unit, vm: HomeViewModel = viewModel()) {
 }
 
 @Composable
-private fun ItemRow(item: Item, vm: HomeViewModel, tier: StaleTier?, onEdit: () -> Unit, onTagTap: () -> Unit) {
+private fun ItemRow(item: Item, vm: HomeViewModel, dot: Int?, tier: StaleTier?, onEdit: () -> Unit, onTagTap: () -> Unit) {
     Column {
         Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
@@ -256,6 +280,10 @@ private fun ItemRow(item: Item, vm: HomeViewModel, tier: StaleTier?, onEdit: () 
                 )
             }
             Row(Modifier.weight(1f).tap(onClick = onEdit).padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                if (dot != null) {
+                    Box(Modifier.size(8.dp).clip(androidx.compose.foundation.shape.CircleShape).background(com.thingstoorder.app.ui.shared.MemberColors[dot.coerceIn(0, 3)]))
+                    Spacer(Modifier.size(10.dp))
+                }
                 Column(Modifier.weight(1f, fill = false)) {
                     Txt(
                         item.name,

@@ -25,8 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
-import com.thingstoorder.app.data.AppDatabase
-import com.thingstoorder.app.data.Item
+import com.thingstoorder.app.data.ItemStore
 import com.thingstoorder.app.ui.components.AddField
 import com.thingstoorder.app.ui.components.Txt
 import com.thingstoorder.app.ui.components.tap
@@ -43,7 +42,7 @@ class QuickAddActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        val dao = AppDatabase.get(this).itemDao()
+        val store = ItemStore(this)
 
         setContent {
             var text by remember { mutableStateOf("") }
@@ -65,7 +64,7 @@ class QuickAddActivity : ComponentActivity() {
                         onSubmit = {
                             val name = text.trim()
                             if (name.isNotEmpty()) {
-                                writeScope.launch { dao.insert(Item(name = name)) }
+                                writeScope.launch { store.add(name) }
                                 lastAdded = name
                                 text = ""
                             }
