@@ -15,3 +15,6 @@ build/
 
 # Local-only
 *.zip
+
+# Firebase client config (keeps the API key out of the public repo)
+app/google-services.json
