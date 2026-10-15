@@ -47,6 +47,7 @@ import androidx.glance.unit.ColorProvider
 import com.thingstoorder.app.R
 import com.thingstoorder.app.data.AppDatabase
 import com.thingstoorder.app.data.ItemStore
+import com.thingstoorder.app.data.shared.SharedLists
 import com.thingstoorder.app.data.Item
 import com.thingstoorder.app.data.SettingsRepository
 import kotlinx.coroutines.flow.first
@@ -73,7 +74,9 @@ class DontForgetWidget : GlanceAppWidget() {
             val items by dao.observeAll().collectAsState(initialItems)
             val minimized by settings.widgetMinimized.collectAsState(initialMinimized)
             val takeoverUntil by settings.widgetTakeoverUntil.collectAsState(initialTakeover)
-            WidgetContent(context, items, minimized, takeoverUntil)
+            val members by SharedLists.get(context).current.collectAsState()
+            val dots = members?.members?.associate { it.uid to it.color } ?: emptyMap()
+            WidgetContent(context, items, minimized, takeoverUntil, dots)
         }
     }
 }
@@ -125,7 +128,7 @@ class VoiceFromWidgetAction : ActionCallback {
 }
 
 @Composable
-private fun WidgetContent(context: Context, items: List<Item>, minimized: Boolean, takeoverUntil: Long?) {
+private fun WidgetContent(context: Context, items: List<Item>, minimized: Boolean, takeoverUntil: Long?, dots: Map<String, Int>) {
     val now = System.currentTimeMillis()
     val state = WidgetMascotState.of(items, now)
     val copy = WidgetCopyBuilder.forState(state, items, now)
@@ -133,7 +136,7 @@ private fun WidgetContent(context: Context, items: List<Item>, minimized: Boolea
     when {
         takeoverUntil != null && now < takeoverUntil -> Takeover(context, state, copy)
         minimized -> MinimizedPill(context, state, copy)
-        else -> Expanded(context, items, remaining, state, copy)
+        else -> Expanded(context, items, remaining, state, copy, dots)
     }
 }
 
@@ -177,6 +180,8 @@ private fun pillDrawable(state: WidgetMascotState) = when (state) {
     WidgetMascotState.AllDone -> R.drawable.widget_pill_alldone
 }
 
+private val DOT_DRAWABLES = listOf(R.drawable.dot_member_0, R.drawable.dot_member_1, R.drawable.dot_member_2, R.drawable.dot_member_3)
+
 private const val STRIP_HEIGHT_DP = 76
 private const val STRIP_FACE_DP = 48
 private const val PILL_FACE_DP = 34
@@ -212,7 +217,7 @@ class AddFromStripAction : ActionCallback {
 }
 
 @Composable
-private fun Expanded(context: Context, items: List<Item>, remaining: Int, state: WidgetMascotState, copy: WidgetCopy) {
+private fun Expanded(context: Context, items: List<Item>, remaining: Int, state: WidgetMascotState, copy: WidgetCopy, dots: Map<String, Int>) {
     Column(GlanceModifier.fillMaxSize().background(ImageProvider(R.drawable.widget_card_bg))) {
         MascotStrip(state)
         Column(GlanceModifier.fillMaxWidth().defaultWeight().padding(start = 18.dp, end = 12.dp, top = 10.dp, bottom = 8.dp)) {
@@ -228,7 +233,7 @@ private fun Expanded(context: Context, items: List<Item>, remaining: Int, state:
             } else {
                 Spacer(GlanceModifier.height(6.dp))
                 LazyColumn(GlanceModifier.fillMaxWidth().defaultWeight()) {
-                    items(items, itemId = { it.id }) { ItemRow(it) }
+                    items(items, itemId = { it.id }) { ItemRow(it, dots[it.addedBy]) }
                 }
                 MicRow()
             }
@@ -249,7 +254,7 @@ private fun MicRow() {
 }
 
 @Composable
-private fun ItemRow(item: Item) {
+private fun ItemRow(item: Item, dot: Int?) {
     Column(GlanceModifier.fillMaxWidth()) {
         Row(GlanceModifier.fillMaxWidth().height(38.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
@@ -257,6 +262,14 @@ private fun ItemRow(item: Item) {
                     .clickable(actionRunCallback<ToggleItemAction>(actionParametersOf(ItemIdKey to item.id))),
                 contentAlignment = Alignment.CenterStart,
             ) { Icon(if (item.checked) R.drawable.icon_checkbox_ticked else R.drawable.icon_checkbox_empty, 18, description = if (item.checked) "Mark not done: ${item.name}" else "Mark done: ${item.name}") }
+            if (dot != null) {
+                Image(
+                    provider = ImageProvider(DOT_DRAWABLES[dot.coerceIn(0, 3)]),
+                    contentDescription = null,
+                    modifier = GlanceModifier.size(8.dp),
+                )
+                Spacer(GlanceModifier.width(8.dp))
+            }
             Text(
                 item.name,
                 modifier = GlanceModifier.defaultWeight(),

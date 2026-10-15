@@ -204,7 +204,7 @@ fun SettingsScreen(onBack: () -> Unit, onHelp: () -> Unit, onPrivacy: () -> Unit
         SettingRow("Pop-up not showing?", onClick = onHelp) { Txt("›", TtoType.Body.copy(fontSize = 22.sp, fontWeight = FontWeight.Normal), color = TtoColor.GrayBody) }
         SettingRow("What we can see", onClick = onPrivacy) { Txt("›", TtoType.Body.copy(fontSize = 22.sp, fontWeight = FontWeight.Normal), color = TtoColor.GrayBody) }
 
-        Txt("Your list stays on this phone.", TtoType.BodySmall.copy(fontSize = 12.sp), Modifier.fillMaxWidth().padding(top = 28.dp), color = TtoColor.GraySecondary, align = TextAlign.Center)
+        Txt("Your list stays on this phone unless you share it.", TtoType.BodySmall.copy(fontSize = 12.sp), Modifier.fillMaxWidth().padding(top = 28.dp), color = TtoColor.GraySecondary, align = TextAlign.Center)
     }
 
     if (pickerOpen) {
@@ -310,6 +310,6 @@ fun PrivacyScreen(onBack: () -> Unit) {
         ScreenHeader("What we can see", onBack)
         Spacer(Modifier.height(20.dp))
         PrivacyCard()
-        Txt("Your list stays on this phone.", TtoType.BodySmall.copy(fontSize = 13.sp), Modifier.padding(top = 16.dp), color = TtoColor.GrayBody)
+        Txt("Your list stays on this phone unless you share it.", TtoType.BodySmall.copy(fontSize = 13.sp), Modifier.padding(top = 16.dp), color = TtoColor.GrayBody)
     }
 }
