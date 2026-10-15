@@ -18,6 +18,7 @@ private fun variable(res: Int, weight: FontWeight) = Font(
 )
 
 val Bricolage = FontFamily(
+    variable(R.font.bricolage_grotesque, FontWeight.Medium),
     variable(R.font.bricolage_grotesque, FontWeight.Bold),
     variable(R.font.bricolage_grotesque, FontWeight.ExtraBold),
 )

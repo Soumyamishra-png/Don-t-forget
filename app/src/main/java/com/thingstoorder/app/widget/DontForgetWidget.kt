@@ -235,6 +235,7 @@ private fun Expanded(context: Context, items: List<Item>, remaining: Int, state:
                 LazyColumn(GlanceModifier.fillMaxWidth().defaultWeight()) {
                     items(items, itemId = { it.id }) { ItemRow(it, dots[it.addedBy]) }
                 }
+                Spacer(GlanceModifier.height(8.dp))
                 MicRow()
             }
         }
@@ -244,12 +245,14 @@ private fun Expanded(context: Context, items: List<Item>, remaining: Int, state:
 @Composable
 private fun MicRow() {
     Row(
-        GlanceModifier.fillMaxWidth().height(40.dp).clickable(actionRunCallback<VoiceFromWidgetAction>()),
+        GlanceModifier.fillMaxWidth().height(48.dp).background(ImageProvider(R.drawable.widget_btn_black))
+            .clickable(actionRunCallback<VoiceFromWidgetAction>()),
         verticalAlignment = Alignment.CenterVertically,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Icon(R.drawable.icon_mic, 18, description = null)
-        Spacer(GlanceModifier.width(10.dp))
-        Text("Tap to say it", style = TextStyle(color = ColorProvider(Ink), fontSize = 15.sp, fontWeight = FontWeight.Medium), maxLines = 1)
+        Icon(R.drawable.icon_mic, 20, tint = Color.White, description = null)
+        Spacer(GlanceModifier.width(8.dp))
+        Text("Tap to say it", style = TextStyle(color = ColorProvider(Color.White), fontSize = 15.sp, fontWeight = FontWeight.Bold), maxLines = 1)
     }
 }
 

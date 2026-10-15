@@ -54,6 +54,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.thingstoorder.app.voice.MicButton
+import com.thingstoorder.app.voice.VoiceButton
 import com.thingstoorder.app.voice.VoiceController
 import com.thingstoorder.app.R
 import com.thingstoorder.app.data.QcApp
@@ -62,6 +63,7 @@ import com.thingstoorder.app.permissions.Permissions
 import com.thingstoorder.app.permissions.rememberPermissionState
 import com.thingstoorder.app.ui.components.Chip
 import com.thingstoorder.app.ui.components.DashedDivider
+import com.thingstoorder.app.ui.components.NotNowButton
 import com.thingstoorder.app.ui.components.PrivacyCard
 import com.thingstoorder.app.ui.components.ProgressDots
 import com.thingstoorder.app.ui.components.StepFooter
@@ -161,21 +163,45 @@ private fun PopupCard(chips: List<String>, modifier: Modifier = Modifier) {
 fun AddItemsScreen(vm: OnboardingViewModel, voice: VoiceController) = StepColumn(dots = 3) {
     var text by rememberSaveable { mutableStateOf("") }
     val submit = { if (vm.addItem(text)) text = "" }
+    val empty = vm.draftItems.isEmpty()
 
-    Headline("What's running low?")
-    if (vm.draftItems.isEmpty()) {
-        Column(Modifier.padding(top = 22.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            MicButton(onClick = voice.begin, size = 72)
-            Txt("Tap and say it", TtoType.Body.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold), Modifier.padding(top = 10.dp))
-            Txt("Hindi words are fine too", TtoType.BodySmall, Modifier.padding(top = 2.dp), color = TtoColor.GraySecondary)
+    Headline(if (empty) "What's running low?" else "Nice, got ${vm.draftItems.size}.")
+    if (empty) {
+        Column(Modifier.weight(1f).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+            MicButton(onClick = voice.begin, size = 120)
+            Txt("Tap and say it", TtoType.Body.copy(fontSize = 16.sp, fontWeight = FontWeight.SemiBold), Modifier.padding(top = 16.dp))
+            Txt(
+                "\"2 litre doodh, eggs aur bread\"",
+                TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.Normal, lineHeight = 20.sp),
+                Modifier.padding(top = 8.dp), color = TtoColor.GrayBody, align = TextAlign.Center,
+            )
+        }
+    } else {
+        LazyColumn(Modifier.weight(1f).padding(top = 18.dp)) {
+            itemsIndexed(vm.draftItems) { index, draft ->
+                Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Image(painterResource(R.drawable.icon_checkbox_empty), null, Modifier.size(16.dp))
+                    Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Txt(draft.name, TtoType.Body.copy(fontWeight = FontWeight.Normal), Modifier.weight(1f, fill = false))
+                        if (draft.quantity != null) {
+                            Box(Modifier.clip(TtoRadius.pill).background(Color(0xFFF1EFEA)).padding(horizontal = 8.dp, vertical = 2.dp)) {
+                                Txt(draft.quantity, TtoType.Body.copy(fontSize = 11.sp, fontWeight = FontWeight.SemiBold))
+                            }
+                        }
+                    }
+                    MinusMark { vm.removeItem(index) }
+                }
+                Rule()
+            }
         }
     }
+
     Row(
-        Modifier.padding(top = if (vm.draftItems.isEmpty()) 18.dp else 22.dp).fillMaxWidth().border(1.5.dp, TtoColor.Ink, TtoRadius.md).padding(horizontal = 16.dp, vertical = 14.dp),
+        Modifier.padding(top = 16.dp, bottom = 16.dp).fillMaxWidth().border(1.5.dp, TtoColor.Ink, TtoRadius.md).padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(Modifier.weight(1f)) {
-            if (text.isEmpty()) Txt(if (vm.draftItems.isEmpty()) "or type an item…" else "Type an item…", TtoType.Body.copy(fontWeight = FontWeight.Normal), color = TtoColor.Faint)
+            if (text.isEmpty()) Txt(if (empty) "or type an item…" else "Type an item…", TtoType.Body.copy(fontWeight = FontWeight.Normal), color = TtoColor.Faint)
             BasicTextField(
                 value = text,
                 onValueChange = { text = it },
@@ -190,35 +216,13 @@ fun AddItemsScreen(vm: OnboardingViewModel, voice: VoiceController) = StepColumn
         Image(painterResource(R.drawable.icon_plus), null, Modifier.height(14.dp).tap(onClick = { submit() }))
     }
 
-    if (vm.draftItems.isEmpty()) {
-        Column(Modifier.weight(1f).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-            Image(painterResource(R.drawable.icon_arrow_doodle), null, Modifier.height(40.dp).rotate(150f))
-            Spacer(Modifier.height(10.dp))
-            Txt(
-                "Your list shows up here. You can add more later.",
-                TtoType.BodySmall, Modifier.widthIn(max = 200.dp), color = TtoColor.GraySecondary, align = TextAlign.Center,
-            )
-        }
-    } else {
-        LazyColumn(Modifier.weight(1f).padding(top = 18.dp)) {
-            itemsIndexed(vm.draftItems) { index, draft ->
-                Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Image(painterResource(R.drawable.icon_checkbox_empty), null, Modifier.size(16.dp))
-                    Txt(draft.name, TtoType.Body.copy(fontWeight = FontWeight.Normal), Modifier.weight(1f))
-                    if (draft.quantity != null) Txt(draft.quantity, TtoType.Body.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold), color = TtoColor.OrangeText)
-                    MinusMark { vm.removeItem(index) }
-                }
-                Rule()
-            }
+    if (!empty) {
+        Row(Modifier.fillMaxWidth().padding(bottom = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            VoiceButton("Say more", filled = false, weight = 1f, onClick = voice.begin, icon = true)
+            VoiceButton("Next", filled = true, weight = 1f, onClick = vm::saveList)
         }
     }
-    if (vm.draftItems.isNotEmpty()) {
-        Box(
-            Modifier.padding(bottom = 8.dp).fillMaxWidth().clip(TtoRadius.md).border(1.5.dp, TtoColor.Ink, TtoRadius.md).tap(onClick = voice.begin).padding(vertical = 14.dp),
-            contentAlignment = Alignment.Center,
-        ) { Txt("Say more", TtoType.Button) }
-    }
-    StepFooter("Next", primaryEnabled = vm.draftItems.isNotEmpty(), onPrimary = vm::saveList, onNotNow = vm::skipList)
+    NotNowButton(onClick = vm::skipList)
 }
 
 // 04

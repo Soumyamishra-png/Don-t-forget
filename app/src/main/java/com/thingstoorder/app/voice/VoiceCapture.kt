@@ -43,6 +43,7 @@ class VoiceCapture(private val context: Context) {
     fun hasPermission() =
         ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
 
+
     fun markDenied() { state = VoiceState.Denied }
 
     fun reset() {

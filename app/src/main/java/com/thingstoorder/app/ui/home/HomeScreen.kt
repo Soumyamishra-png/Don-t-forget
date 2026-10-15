@@ -157,30 +157,6 @@ fun HomeScreen(onOpenSettings: () -> Unit, vm: HomeViewModel = viewModel()) {
                     )
                 }
             }
-            Column(Modifier.fillMaxWidth().padding(top = if (setupBroken) 14.dp else 18.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                MicButton(onClick = voice.begin, size = 72)
-                Txt("Say what you need", TtoType.Body.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold), Modifier.padding(top = 10.dp))
-                if (!typing && text.isEmpty()) {
-                    Txt(
-                        "or type instead",
-                        TtoType.Body.copy(fontSize = 13.sp, fontWeight = FontWeight.Normal, textDecoration = TextDecoration.Underline),
-                        Modifier.tap { typing = true }.padding(8.dp), color = TtoColor.GrayBody,
-                    )
-                }
-                if (voiceNote != null) {
-                    Txt(voiceNote!!, TtoType.BodySmall, Modifier.padding(top = 4.dp), color = TtoColor.OrangeText, align = TextAlign.Center)
-                }
-            }
-            if (typing || text.isNotEmpty()) {
-                AddField(
-                    value = text,
-                    onValueChange = { text = it },
-                    onSubmit = { if (vm.add(text)) text = "" },
-                    placeholder = "Add something…",
-                    modifier = Modifier.padding(top = 12.dp),
-                )
-            }
-
             Column(Modifier.weight(1f).fillMaxWidth()) {
                 when {
                     items.isEmpty() -> EmptyState()
@@ -217,6 +193,37 @@ fun HomeScreen(onOpenSettings: () -> Unit, vm: HomeViewModel = viewModel()) {
                 }
             }
 
+            if (voiceNote != null) {
+                Txt(voiceNote!!, TtoType.BodySmall, Modifier.fillMaxWidth().padding(top = 8.dp), color = TtoColor.OrangeText, align = TextAlign.Center)
+            }
+            if (typing || text.isNotEmpty()) {
+                Row(Modifier.fillMaxWidth().padding(top = 12.dp, bottom = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    AddField(
+                        value = text,
+                        onValueChange = { text = it },
+                        onSubmit = { if (vm.add(text)) text = "" },
+                        placeholder = "Type an item…",
+                        modifier = Modifier.weight(1f),
+                    )
+                    Box(
+                        Modifier.size(56.dp).clip(TtoRadius.md).background(TtoColor.Ink).tap(onClick = voice.begin)
+                            .semantics { contentDescription = "Say what you need" },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Image(painterResource(R.drawable.icon_mic), null, Modifier.size(24.dp), colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(Color.White))
+                    }
+                }
+            } else {
+                Column(Modifier.fillMaxWidth().padding(top = 12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    MicButton(onClick = voice.begin, size = 80, lifted = true)
+                    Txt(
+                        "or type instead",
+                        TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.SemiBold),
+                        Modifier.tap { typing = true }.padding(12.dp), color = TtoColor.GrayBody,
+                    )
+                }
+            }
+
             DashedDivider()
             Txt(
                 when {
@@ -233,7 +240,7 @@ fun HomeScreen(onOpenSettings: () -> Unit, vm: HomeViewModel = viewModel()) {
 
         if (shareOpen) ShareSheet(onDismiss = { shareOpen = false })
 
-        VoiceSheet(voice, onAdd = { parsed ->
+        VoiceSheet(voice, onTypeInstead = { typing = true }, onAdd = { parsed ->
             vm.addVoice(parsed) { skipped ->
                 voiceNote = when (skipped.size) {
                     0 -> null
@@ -296,7 +303,9 @@ private fun ItemRow(item: Item, vm: HomeViewModel, dot: Int?, tier: StaleTier?, 
                 }
                 if (item.quantity != null) {
                     Spacer(Modifier.size(8.dp))
-                    Txt(item.quantity, TtoType.Body.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold), color = if (item.checked) TtoColor.Faint else TtoColor.OrangeText)
+                    Box(Modifier.clip(TtoRadius.pill).background(Color(0xFFF1EFEA)).padding(horizontal = 8.dp, vertical = 2.dp)) {
+                        Txt(item.quantity, TtoType.Body.copy(fontSize = 11.sp, fontWeight = FontWeight.SemiBold), color = if (item.checked) TtoColor.Faint else TtoColor.Ink)
+                    }
                 }
                 if (tier != null) {
                     Spacer(Modifier.size(8.dp))

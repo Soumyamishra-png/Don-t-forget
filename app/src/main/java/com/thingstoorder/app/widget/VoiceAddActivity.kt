@@ -36,7 +36,9 @@ class VoiceAddActivity : ComponentActivity() {
                 if (started && voice.capture.state is VoiceState.Idle) finish()
             }
 
-            VoiceSheet(voice, onAdd = { parsed ->
+            VoiceSheet(voice, onTypeInstead = {
+                startActivity(android.content.Intent(this, QuickAddActivity::class.java))
+            }, onAdd = { parsed ->
                 lifecycleScope.launch {
                     store.addParsed(parsed)
                     DontForgetWidget().updateAll(applicationContext)
