@@ -129,6 +129,8 @@ class SharedLists private constructor(private val app: Context) {
             }.await()
         }
         mergeLocalInto(listRef.id, uid)
+        // Orders from before you joined are not news.
+        settings.setOrderBannerSeen(System.currentTimeMillis())
         settings.setShared(listRef.id, normalize(code))
         attach(listRef.id)
     }
