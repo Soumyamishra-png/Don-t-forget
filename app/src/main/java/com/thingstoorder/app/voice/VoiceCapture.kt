@@ -12,6 +12,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,6 +20,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import androidx.glance.appwidget.updateAll
+import com.thingstoorder.app.data.SettingsRepository
+import com.thingstoorder.app.widget.DontForgetWidget
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 sealed interface VoiceState {
     data object Idle : VoiceState
@@ -117,7 +124,20 @@ fun rememberVoiceController(): VoiceController {
         if (granted) capture.start() else capture.markDenied()
     }
     DisposableEffect(capture) { onDispose { capture.cancel() } }
+    // While the sheet is listening, the home-screen widget shows its mint Listening state.
+    val listening = capture.state is VoiceState.Listening
+    val appContext = context.applicationContext
+    LaunchedEffect(listening) { setWidgetListening(appContext, listening) }
+    DisposableEffect(Unit) {
+        onDispose { CoroutineScope(Dispatchers.Default).launch { setWidgetListening(appContext, false) } }
+    }
     return remember(capture, launcher) {
         VoiceController(capture) { if (capture.hasPermission()) capture.start() else launcher.launch(Manifest.permission.RECORD_AUDIO) }
     }
+}
+
+private suspend fun setWidgetListening(context: Context, listening: Boolean) {
+    // A 90 second expiry keeps the widget from staying mint if the app is killed mid-listen.
+    SettingsRepository(context).setWidgetListeningUntil(if (listening) System.currentTimeMillis() + 90_000L else null)
+    DontForgetWidget().updateAll(context)
 }

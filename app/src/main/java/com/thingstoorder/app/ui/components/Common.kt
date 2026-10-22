@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -24,7 +23,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.thingstoorder.app.ui.theme.TtoColor
@@ -49,41 +47,45 @@ fun Modifier.tap(enabled: Boolean = true, onClick: () -> Unit): Modifier =
         onClick = onClick,
     )
 
+/** Equal-width bars: finished steps ink, the current step green, the rest line. */
 @Composable
 fun ProgressDots(active: Int, total: Int = 10, modifier: Modifier = Modifier) {
-    Row(modifier, horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
         for (i in 1..total) {
-            val isActive = i == active
             Box(
-                Modifier
-                    .width(if (isActive) 18.dp else 6.dp)
-                    .height(6.dp)
-                    .clip(TtoRadius.pill)
-                    .background(if (i <= active) TtoColor.Ink else TtoColor.Line),
+                Modifier.weight(1f).height(4.dp).clip(TtoRadius.pill)
+                    .background(
+                        when {
+                            i < active -> TtoColor.Ink
+                            i == active -> TtoColor.Green
+                            else -> TtoColor.Line
+                        },
+                    ),
             )
         }
     }
 }
 
+/** One per screen, full width, 52dp. Disabled until the screen has an answer. */
 @Composable
 fun PrimaryButton(label: String, enabled: Boolean = true, onClick: () -> Unit) {
     Box(
         Modifier
             .fillMaxWidth()
+            .height(52.dp)
             .clip(TtoRadius.md)
             .background(if (enabled) TtoColor.Ink else TtoColor.Line)
-            .tap(enabled, onClick)
-            .padding(vertical = 15.dp),
+            .tap(enabled, onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Txt(label, TtoType.Button, color = Color.White)
+        Txt(label, TtoType.Button, color = if (enabled) TtoColor.Paper else TtoColor.InkSubtle)
     }
 }
 
 @Composable
 fun NotNowButton(label: String = "Not now", onClick: () -> Unit) {
-    Box(Modifier.fillMaxWidth().tap(onClick = onClick).padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
-        Txt(label, TtoType.Button.copy(fontSize = 14.sp))
+    Box(Modifier.fillMaxWidth().height(44.dp).tap(onClick = onClick), contentAlignment = Alignment.Center) {
+        Txt(label, TtoType.Button.copy(fontSize = 14.sp), color = TtoColor.InkMuted)
     }
 }
 
@@ -94,7 +96,7 @@ fun StepFooter(
     onPrimary: () -> Unit,
     onNotNow: (() -> Unit)? = null,
 ) {
-    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         PrimaryButton(primaryLabel, primaryEnabled, onPrimary)
         if (onNotNow != null) NotNowButton(onClick = onNotNow)
     }
@@ -113,15 +115,16 @@ fun DashedDivider(color: Color = TtoColor.Line, modifier: Modifier = Modifier) {
     }
 }
 
+/** Straight outlined pill, 2dp ink, as used for tag chips. */
 @Composable
 fun Chip(label: String, modifier: Modifier = Modifier) {
     Box(
         modifier
             .clip(TtoRadius.pill)
-            .background(TtoColor.OffWhite)
-            .border(1.3.dp, TtoColor.Ink, TtoRadius.pill)
-            .padding(horizontal = 14.dp, vertical = 7.dp),
+            .background(TtoColor.Paper)
+            .border(2.dp, TtoColor.Ink, TtoRadius.pill)
+            .padding(horizontal = 16.dp, vertical = 9.dp),
     ) {
-        Txt(label, TtoType.Caption.copy(fontSize = 14.sp, letterSpacing = TextUnit.Unspecified))
+        Txt(label, TtoType.Chip.copy(fontSize = 14.sp))
     }
 }

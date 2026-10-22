@@ -51,6 +51,7 @@ class SettingsRepository(private val context: Context) {
         val pillX = intPreferencesKey("pill_x")
         val pillY = intPreferencesKey("pill_y")
         val widgetTakeoverUntil = longPreferencesKey("widget_takeover_until")
+        val widgetListeningUntil = longPreferencesKey("widget_listening_until")
         val sharedListId = stringPreferencesKey("shared_list_id")
         val sharedCode = stringPreferencesKey("shared_code")
         val myName = stringPreferencesKey("my_name")
@@ -75,6 +76,14 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setOrderBannerSeen(at: Long) {
         context.settingsStore.edit { it[Keys.orderBannerSeen] = at }
+    }
+
+    val widgetListeningUntil: Flow<Long?> = context.settingsStore.data.map { it[Keys.widgetListeningUntil] }
+
+    suspend fun setWidgetListeningUntil(until: Long?) {
+        context.settingsStore.edit { p: androidx.datastore.preferences.core.MutablePreferences ->
+            if (until == null) p.remove(Keys.widgetListeningUntil) else p[Keys.widgetListeningUntil] = until
+        }
     }
 
     val widgetTakeoverUntil: Flow<Long?> = context.settingsStore.data.map { it[Keys.widgetTakeoverUntil] }

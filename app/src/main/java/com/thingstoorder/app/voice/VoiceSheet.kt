@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,15 +21,12 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -39,49 +37,43 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.thingstoorder.app.R
+import com.thingstoorder.app.ui.components.FaceMood
+import com.thingstoorder.app.ui.components.FaceTile
 import com.thingstoorder.app.ui.components.Txt
 import com.thingstoorder.app.ui.components.tap
-import com.thingstoorder.app.ui.theme.Bricolage
 import com.thingstoorder.app.ui.theme.TtoColor
 import com.thingstoorder.app.ui.theme.TtoRadius
 import com.thingstoorder.app.ui.theme.TtoType
 
-private val ListeningBlue = Color(0xFF4FB3FF)
-private val ProblemBlue = Color(0xFF9AD4FF)
-private val QuantityBlue = Color(0xFF1F6BFF)
-private val SheetShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
-
+/** The voice-first entry: a round ink button with a paper mic. 120dp in onboarding, 80dp on Home, 72dp on a shared list. */
 @Composable
-fun MicButton(onClick: () -> Unit, size: Int = 64, modifier: Modifier = Modifier, lifted: Boolean = false) {
+fun MicButton(onClick: () -> Unit, size: Int = 64, modifier: Modifier = Modifier) {
     Box(
-        modifier.then(if (lifted) Modifier.shadow(8.dp, CircleShape) else Modifier)
-            .size(size.dp).clip(CircleShape).background(TtoColor.Ink).tap(onClick = onClick)
+        modifier.size(size.dp).clip(CircleShape).background(TtoColor.Ink).tap(onClick = onClick)
             .semantics { contentDescription = "Say what you need" },
         contentAlignment = Alignment.Center,
     ) {
-        Image(painterResource(R.drawable.icon_mic), null, Modifier.size((size * 0.4f).dp), colorFilter = ColorFilter.tint(Color.White))
+        Image(painterResource(R.drawable.icon_mic), null, Modifier.size((size * 0.4f).dp), colorFilter = ColorFilter.tint(TtoColor.Paper))
     }
 }
 
-/** 52dp action button used across the voice screens: outlined or filled, 14dp corners. */
+/** 52dp action button used across the voice screens: 2dp ink outline or ink fill. Pairs take 1 part and 2 parts. */
 @Composable
 fun RowScope.VoiceButton(label: String, filled: Boolean, weight: Float, onClick: () -> Unit, icon: Boolean = false) {
     Row(
         Modifier.weight(weight).height(52.dp).clip(TtoRadius.md)
-            .then(if (filled) Modifier.background(TtoColor.Ink) else Modifier.border(1.5.dp, TtoColor.Ink, TtoRadius.md))
+            .then(if (filled) Modifier.background(TtoColor.Ink) else Modifier.border(2.dp, TtoColor.Ink, TtoRadius.md))
             .tap(onClick = onClick),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (icon) {
-            Image(painterResource(R.drawable.icon_mic), null, Modifier.size(18.dp), colorFilter = ColorFilter.tint(if (filled) Color.White else TtoColor.Ink))
-            androidx.compose.foundation.layout.Spacer(Modifier.size(8.dp))
+            Image(painterResource(R.drawable.icon_mic), null, Modifier.size(20.dp), colorFilter = ColorFilter.tint(if (filled) TtoColor.Paper else TtoColor.Ink))
+            Spacer(Modifier.size(8.dp))
         }
-        Txt(label, TtoType.Button, color = if (filled) Color.White else TtoColor.Ink)
+        Txt(label, TtoType.Button, color = if (filled) TtoColor.Paper else TtoColor.Ink)
     }
 }
-
-private val Transcript = TtoType.Body.copy(fontFamily = Bricolage, fontWeight = FontWeight.Medium, fontSize = 20.sp, lineHeight = 26.sp)
 
 /**
  * Bottom sheet that follows the capture state. Renders nothing while idle.
@@ -101,16 +93,16 @@ fun VoiceSheet(
 
     val typeInstead = { capture.reset(); onTypeInstead() }
 
-    Box(Modifier.fillMaxSize().background(Color(0x6B171717)).tap { capture.reset() }) {
-        Column(Modifier.align(Alignment.BottomCenter).fillMaxWidth().clip(SheetShape).tap { }) {
+    Box(Modifier.fillMaxSize().background(TtoColor.Scrim).tap { capture.reset() }) {
+        Column(Modifier.align(Alignment.BottomCenter).fillMaxWidth().clip(TtoRadius.sheet).tap { }) {
             when (state) {
-                is VoiceState.Listening -> BlueSheet { Listening(state.partial, onDone = capture::finish) }
+                is VoiceState.Listening -> MintSheet { Listening(state.partial, onDone = capture::finish) }
                 is VoiceState.Heard -> {
                     val parsed = remember(state.text) { VoiceParser.parse(state.text) }
                     if (parsed.isEmpty()) {
                         ProblemSheet("Didn't catch any items", "I heard \"${state.text}\". Try naming things like milk, eggs, bread.", controller.begin, typeInstead)
                     } else {
-                        BlueSheet { Heard(state.text, parsed, controller, onAdd, addLabel) }
+                        MintSheet { Heard(state.text, parsed, controller, onAdd, addLabel) }
                     }
                 }
                 VoiceState.NothingHeard -> ProblemSheet("Didn't catch that", "Try again, a little closer.", controller.begin, typeInstead)
@@ -124,27 +116,26 @@ fun VoiceSheet(
     }
 }
 
+/** The listening sheet: mint, with a grip, 24dp insets and 16dp between blocks. */
 @Composable
-private fun BlueSheet(content: @Composable () -> Unit) {
+private fun MintSheet(content: @Composable () -> Unit) {
     Column(
-        Modifier.fillMaxWidth().background(ListeningBlue).navigationBarsPadding().padding(24.dp),
+        Modifier.fillMaxWidth().background(TtoColor.Mint).navigationBarsPadding().padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) { content() }
-}
-
-@Composable
-private fun Face() {
-    Image(painterResource(R.drawable.mark_face_typing), null, Modifier.size(width = 64.dp, height = 52.dp))
+    ) {
+        Box(Modifier.size(width = 40.dp, height = 4.dp).clip(TtoRadius.pill).background(TtoColor.Paper))
+        content()
+    }
 }
 
 @Composable
 private fun Listening(partial: String, onDone: () -> Unit) {
-    Face()
+    FaceTile(FaceMood.Listening, 64.dp)
     Txt(
         if (partial.isBlank()) "Listening…" else "\"$partial\"",
-        Transcript, Modifier.fillMaxWidth().padding(vertical = 8.dp),
-        color = if (partial.isBlank()) TtoColor.Ink.copy(alpha = 0.55f) else TtoColor.Ink, align = TextAlign.Center,
+        TtoType.Transcript, Modifier.fillMaxWidth().padding(vertical = 8.dp),
+        color = if (partial.isBlank()) TtoColor.InkMuted else TtoColor.Ink, align = TextAlign.Center,
     )
     Row(Modifier.fillMaxWidth().padding(top = 8.dp)) { VoiceButton("Done", filled = true, weight = 1f, onClick = onDone) }
 }
@@ -155,8 +146,8 @@ private fun Heard(
     onAdd: (List<ParsedItem>) -> Unit, addLabel: (Int) -> String,
 ) {
     val items = remember(text) { mutableStateListOf<ParsedItem>().apply { addAll(parsed) } }
-    Face()
-    Txt("\"$text\"", Transcript.copy(fontSize = 22.sp, lineHeight = 28.sp), Modifier.fillMaxWidth(), align = TextAlign.Center)
+    FaceTile(FaceMood.Listening, 64.dp)
+    Txt("\"$text\"", TtoType.Transcript, Modifier.fillMaxWidth(), align = TextAlign.Center)
     FlowRow(
         Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
@@ -164,17 +155,17 @@ private fun Heard(
     ) {
         items.forEach { item ->
             Row(
-                Modifier.clip(TtoRadius.pill).background(Color.White).padding(start = 12.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
+                Modifier.clip(TtoRadius.pill).background(TtoColor.Paper).padding(start = 14.dp, end = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Txt(item.name, TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.Medium), Modifier.padding(vertical = 4.dp))
+                Txt(item.name, TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.Medium), Modifier.padding(vertical = 10.dp))
                 if (item.quantity != null) {
-                    Txt(item.quantity, TtoType.Body.copy(fontSize = 11.sp, fontWeight = FontWeight.SemiBold), Modifier.padding(start = 8.dp), color = QuantityBlue)
+                    Txt(item.quantity, TtoType.Tag, Modifier.padding(start = 8.dp), color = TtoColor.GreenDeep)
                 }
                 Box(
-                    Modifier.padding(start = 2.dp).size(28.dp).tap { items.remove(item) }.semantics { contentDescription = "Remove ${item.name}" },
+                    Modifier.size(32.dp).tap { items.remove(item) }.semantics { contentDescription = "Remove ${item.name}" },
                     contentAlignment = Alignment.Center,
-                ) { Txt("×", TtoType.Body.copy(fontSize = 16.sp, fontWeight = FontWeight.Normal), color = TtoColor.GrayBody) }
+                ) { Image(painterResource(R.drawable.icon_minus), null, Modifier.size(14.dp)) }
             }
         }
     }
@@ -189,23 +180,23 @@ private fun Heard(
     }
 }
 
-/** "Didn't catch that" and friends: light-blue band with the puzzled face, then two equal buttons. */
+/** "Didn't catch that" and friends: white sheet, title and helper on the left, the puzzled face on the right, then Type instead + Retry. */
 @Composable
 private fun ProblemSheet(title: String, body: String, onRetry: (() -> Unit)?, onTypeInstead: () -> Unit) {
-    Column(Modifier.fillMaxWidth().background(Color.White).navigationBarsPadding()) {
-        Box(Modifier.fillMaxWidth().height(70.dp).background(ProblemBlue), contentAlignment = Alignment.Center) {
-            Image(painterResource(R.drawable.mark_face_confused), null, Modifier.size(width = 64.dp, height = 52.dp))
+    PaperSheet {
+        Row(verticalAlignment = Alignment.Top) {
+            Column(Modifier.weight(1f).padding(end = 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Txt(title, TtoType.SheetTitle)
+                Txt(body, TtoType.BodySmall, color = TtoColor.InkMuted)
+            }
+            FaceTile(FaceMood.Confused, 64.dp)
         }
-        Column(Modifier.padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Txt(title, TtoType.SectionTitle.copy(fontSize = 20.sp))
-            Txt(body, TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.Normal, lineHeight = 20.sp), color = TtoColor.GrayBody)
-            Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (onRetry != null) {
-                    VoiceButton("Type instead", filled = false, weight = 1f, onClick = onTypeInstead)
-                    VoiceButton("Retry", filled = true, weight = 1f, onClick = onRetry)
-                } else {
-                    VoiceButton("Type instead", filled = true, weight = 1f, onClick = onTypeInstead)
-                }
+        Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (onRetry != null) {
+                VoiceButton("Type instead", filled = false, weight = 1f, onClick = onTypeInstead)
+                VoiceButton("Retry", filled = true, weight = 2f, onClick = onRetry)
+            } else {
+                VoiceButton("Type instead", filled = true, weight = 1f, onClick = onTypeInstead)
             }
         }
     }
@@ -214,27 +205,35 @@ private fun ProblemSheet(title: String, body: String, onRetry: (() -> Unit)?, on
 @Composable
 private fun DeniedSheet(onTypeInstead: () -> Unit) {
     val context = LocalContext.current
-    Column(Modifier.fillMaxWidth().background(Color.White).navigationBarsPadding()) {
-        Box(Modifier.fillMaxWidth().height(70.dp).background(ProblemBlue), contentAlignment = Alignment.Center) {
-            Image(painterResource(R.drawable.mark_face_confused), null, Modifier.size(width = 64.dp, height = 52.dp))
-        }
-        Column(Modifier.padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Txt("Mic is off for Don't Forget", TtoType.SectionTitle.copy(fontSize = 20.sp))
-            Txt(
-                "Allow the microphone and you can say your list instead of typing it. You can always type.",
-                TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.Normal, lineHeight = 20.sp), color = TtoColor.GrayBody,
-            )
-            Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                VoiceButton("Type instead", filled = false, weight = 1f, onClick = onTypeInstead)
-                VoiceButton(
-                    "Open settings", filled = true, weight = 1f,
-                    onClick = {
-                        context.startActivity(
-                            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${context.packageName}")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                        )
-                    },
-                )
+    PaperSheet {
+        Row(verticalAlignment = Alignment.Top) {
+            Column(Modifier.weight(1f).padding(end = 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Txt("No mic, no problem.", TtoType.SheetTitle)
+                Txt("You can type for now. Turn the mic on in Settings whenever you like.", TtoType.BodySmall, color = TtoColor.InkMuted)
             }
+            FaceTile(FaceMood.Confused, 64.dp)
         }
+        Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            VoiceButton("Type instead", filled = false, weight = 1f, onClick = onTypeInstead)
+            VoiceButton(
+                "Open Settings", filled = true, weight = 2f,
+                onClick = {
+                    context.startActivity(
+                        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${context.packageName}")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                    )
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun PaperSheet(content: @Composable () -> Unit) {
+    Column(
+        Modifier.fillMaxWidth().background(TtoColor.Paper).navigationBarsPadding().padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Box(Modifier.size(width = 40.dp, height = 4.dp).clip(TtoRadius.pill).background(TtoColor.Line).align(Alignment.CenterHorizontally))
+        content()
     }
 }

@@ -65,7 +65,12 @@ import com.thingstoorder.app.ui.components.Chip
 import com.thingstoorder.app.ui.components.DashedDivider
 import com.thingstoorder.app.ui.components.NotNowButton
 import com.thingstoorder.app.ui.components.PrivacyCard
+import com.thingstoorder.app.ui.components.AddField
+import com.thingstoorder.app.ui.components.FaceMood
+import com.thingstoorder.app.ui.components.FaceTile
 import com.thingstoorder.app.ui.components.ProgressDots
+import com.thingstoorder.app.ui.components.RoundCheck
+import com.thingstoorder.app.ui.components.TagPill
 import com.thingstoorder.app.ui.components.StepFooter
 import com.thingstoorder.app.ui.components.Txt
 import com.thingstoorder.app.ui.components.tap
@@ -74,8 +79,8 @@ import com.thingstoorder.app.ui.theme.TtoRadius
 import com.thingstoorder.app.ui.theme.TtoType
 import com.thingstoorder.app.widget.WidgetPinning
 
-private val body14 = TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.Normal)
-private val sub14 = TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.Normal, lineHeight = 20.sp)
+private val body14 = TtoType.BodySmall
+private val sub14 = TtoType.BodySmall
 
 @Composable
 private fun StepColumn(dots: Int?, content: @Composable ColumnScope.() -> Unit) {
@@ -86,7 +91,7 @@ private fun StepColumn(dots: Int?, content: @Composable ColumnScope.() -> Unit) 
 }
 
 @Composable
-private fun Headline(text: String) = Txt(text, TtoType.Headline, Modifier.padding(top = 22.dp))
+private fun Headline(text: String) = Txt(text, TtoType.Headline, Modifier.padding(top = 24.dp))
 
 @Composable
 private fun SubText(text: String) = Txt(text, sub14, Modifier.padding(top = 8.dp), color = TtoColor.GrayBody)
@@ -97,9 +102,9 @@ private fun Rule() = Box(Modifier.fillMaxWidth().height(1.dp).background(TtoColo
 @Composable
 private fun MinusMark(onClick: (() -> Unit)? = null) {
     Box(
-        Modifier.size(32.dp).then(if (onClick != null) Modifier.tap(onClick = onClick) else Modifier),
+        Modifier.size(44.dp).then(if (onClick != null) Modifier.tap(onClick = onClick) else Modifier),
         contentAlignment = Alignment.CenterEnd,
-    ) { Box(Modifier.width(10.dp).height(1.6.dp).background(TtoColor.Ink)) }
+    ) { Image(painterResource(R.drawable.icon_minus), null, Modifier.size(20.dp)) }
 }
 
 // 01
@@ -122,16 +127,20 @@ fun HowItWorksScreen(vm: OnboardingViewModel) = StepColumn(dots = 2) {
         Txt("On your home screen", TtoType.Caption.copy(fontSize = 12.sp), color = TtoColor.GraySecondary)
         Spacer(Modifier.height(8.dp))
         Column(
-            Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(TtoColor.Paper)
-                .border(1.5.dp, TtoColor.Ink, RoundedCornerShape(20.dp)).padding(horizontal = 18.dp, vertical = 16.dp),
+            Modifier.fillMaxWidth().clip(TtoRadius.xl).background(TtoColor.Green).padding(horizontal = 20.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Txt("Things to Order", TtoType.Headline.copy(fontSize = 17.sp, lineHeight = 20.sp))
-            Spacer(Modifier.height(6.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Txt("Things to Order", TtoType.ScreenTitle)
+                    Txt("Ready when you are.", TtoType.BodySmall)
+                }
+                FaceTile(FaceMood.Eager, 44.dp)
+            }
             rows.forEach {
-                Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Image(painterResource(R.drawable.icon_checkbox_empty), null, Modifier.size(16.dp))
-                    Txt(it, TtoType.Body.copy(fontSize = 15.sp, fontWeight = FontWeight.Normal), Modifier.weight(1f))
-                    Box(Modifier.width(10.dp).height(1.6.dp).background(TtoColor.Ink))
+                Row(Modifier.fillMaxWidth().height(32.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    RoundCheck(false, 18.dp)
+                    Txt(it, TtoType.Body, Modifier.weight(1f))
                 }
             }
         }
@@ -149,10 +158,15 @@ fun HowItWorksScreen(vm: OnboardingViewModel) = StepColumn(dots = 2) {
 @Composable
 private fun PopupCard(chips: List<String>, modifier: Modifier = Modifier) {
     Column(
-        modifier.shadow(10.dp, RoundedCornerShape(20.dp)).background(TtoColor.Paper, RoundedCornerShape(20.dp)).padding(16.dp),
+        modifier.shadow(12.dp, TtoRadius.xl, ambientColor = TtoColor.Ink.copy(alpha = 0.28f), spotColor = TtoColor.Ink.copy(alpha = 0.28f))
+            .background(TtoColor.Paper, TtoRadius.xl).padding(16.dp),
     ) {
-        Txt("tap to add", TtoType.Headline.copy(fontSize = 16.sp, lineHeight = 19.sp))
-        FlowRow(Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            FaceTile(FaceMood.Eager, 44.dp)
+            Txt("tap to add", TtoType.ScreenTitle.copy(fontSize = 16.sp, lineHeight = 19.sp), Modifier.padding(start = 12.dp).weight(1f))
+            Image(painterResource(R.drawable.icon_chevron), null, Modifier.size(20.dp))
+        }
+        FlowRow(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             chips.forEach { Chip(it) }
         }
     }
@@ -169,57 +183,41 @@ fun AddItemsScreen(vm: OnboardingViewModel, voice: VoiceController) = StepColumn
     if (empty) {
         Column(Modifier.weight(1f).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
             MicButton(onClick = voice.begin, size = 120)
-            Txt("Tap and say it", TtoType.Body.copy(fontSize = 16.sp, fontWeight = FontWeight.SemiBold), Modifier.padding(top = 16.dp))
+            Txt("Tap and say it", TtoType.BodyLarge.copy(fontWeight = FontWeight.SemiBold), Modifier.padding(top = 16.dp))
             Txt(
                 "\"2 litre doodh, eggs aur bread\"",
-                TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.Normal, lineHeight = 20.sp),
+                TtoType.BodySmall,
                 Modifier.padding(top = 8.dp), color = TtoColor.GrayBody, align = TextAlign.Center,
             )
         }
     } else {
         LazyColumn(Modifier.weight(1f).padding(top = 18.dp)) {
             itemsIndexed(vm.draftItems) { index, draft ->
-                Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Image(painterResource(R.drawable.icon_checkbox_empty), null, Modifier.size(16.dp))
+                Row(Modifier.fillMaxWidth().height(48.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    RoundCheck(false, 22.dp)
                     Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Txt(draft.name, TtoType.Body.copy(fontWeight = FontWeight.Normal), Modifier.weight(1f, fill = false))
-                        if (draft.quantity != null) {
-                            Box(Modifier.clip(TtoRadius.pill).background(Color(0xFFF1EFEA)).padding(horizontal = 8.dp, vertical = 2.dp)) {
-                                Txt(draft.quantity, TtoType.Body.copy(fontSize = 11.sp, fontWeight = FontWeight.SemiBold))
-                            }
-                        }
+                        Txt(draft.name, TtoType.BodyLarge, Modifier.weight(1f, fill = false))
+                        if (draft.quantity != null) TagPill(draft.quantity)
                     }
                     MinusMark { vm.removeItem(index) }
                 }
-                Rule()
             }
         }
     }
 
-    Row(
-        Modifier.padding(top = 16.dp, bottom = 16.dp).fillMaxWidth().border(1.5.dp, TtoColor.Ink, TtoRadius.md).padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(Modifier.weight(1f)) {
-            if (text.isEmpty()) Txt(if (empty) "or type an item…" else "Type an item…", TtoType.Body.copy(fontWeight = FontWeight.Normal), color = TtoColor.Faint)
-            BasicTextField(
-                value = text,
-                onValueChange = { text = it },
-                singleLine = true,
-                textStyle = TtoType.Body.copy(fontWeight = FontWeight.Normal, color = TtoColor.Ink),
-                cursorBrush = SolidColor(TtoColor.Orange),
-                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(onDone = { submit() }),
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-        Image(painterResource(R.drawable.icon_plus), null, Modifier.height(14.dp).tap(onClick = { submit() }))
-    }
+    AddField(
+        value = text,
+        onValueChange = { text = it },
+        onSubmit = { submit() },
+        placeholder = if (empty) "or type an item…" else "Type an item…",
+        modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),
+        onMic = if (empty) null else voice.begin,
+    )
 
     if (!empty) {
         Row(Modifier.fillMaxWidth().padding(bottom = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             VoiceButton("Say more", filled = false, weight = 1f, onClick = voice.begin, icon = true)
-            VoiceButton("Next", filled = true, weight = 1f, onClick = vm::saveList)
+            VoiceButton("Next", filled = true, weight = 2f, onClick = vm::saveList)
         }
     }
     NotNowButton(onClick = vm::skipList)
@@ -229,14 +227,14 @@ fun AddItemsScreen(vm: OnboardingViewModel, voice: VoiceController) = StepColumn
 @Composable
 internal fun RadioRow(label: String, selected: Boolean, onClick: () -> Unit) {
     Row(
-        Modifier.fillMaxWidth().clip(TtoRadius.md)
-            .border(1.5.dp, if (selected) TtoColor.Ink else TtoColor.Line, TtoRadius.md)
-            .tap(onClick = onClick).padding(horizontal = 16.dp, vertical = 14.dp),
+        Modifier.fillMaxWidth().height(56.dp).clip(TtoRadius.md)
+            .border(2.dp, if (selected) TtoColor.Ink else TtoColor.Line, TtoRadius.md)
+            .tap(onClick = onClick).padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Txt(label, TtoType.Body.copy(fontWeight = FontWeight.SemiBold), Modifier.weight(1f))
-        Box(Modifier.size(16.dp).border(1.5.dp, if (selected) TtoColor.Ink else TtoColor.Line, CircleShape), contentAlignment = Alignment.Center) {
-            if (selected) Box(Modifier.size(8.dp).clip(CircleShape).background(TtoColor.Ink))
+        Box(Modifier.size(22.dp).border(2.dp, if (selected) TtoColor.Ink else TtoColor.LineStrong, CircleShape), contentAlignment = Alignment.Center) {
+            if (selected) Box(Modifier.size(10.dp).clip(CircleShape).background(TtoColor.Ink))
         }
     }
 }
@@ -244,22 +242,23 @@ internal fun RadioRow(label: String, selected: Boolean, onClick: () -> Unit) {
 @Composable
 fun ReminderScreen(vm: OnboardingViewModel) = StepColumn(dots = 4) {
     Headline("How often should we remind you?")
-    Column(Modifier.padding(top = 26.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(Modifier.padding(top = 32.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         RadioRow("Once a day", vm.reminder == ReminderMode.Once) { vm.selectReminder(ReminderMode.Once) }
         RadioRow("Twice a day", vm.reminder == ReminderMode.Twice) { vm.selectReminder(ReminderMode.Twice) }
         RadioRow("Custom", vm.reminder == ReminderMode.Custom) { vm.selectReminder(ReminderMode.Custom) }
     }
     if (vm.reminder == ReminderMode.Custom) {
-        Txt("EVERY", TtoType.Caption, Modifier.padding(top = 16.dp), color = TtoColor.GraySecondary)
+        Txt("EVERY", TtoType.Caption, Modifier.padding(top = 16.dp), color = TtoColor.InkMuted)
         Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             listOf(2, 4, 6, 8).forEach { h ->
                 val selected = vm.reminderHours == h
                 Box(
-                    Modifier.clip(TtoRadius.pill)
-                        .background(if (selected) TtoColor.Ink else Color.Transparent)
-                        .border(1.5.dp, TtoColor.Ink, TtoRadius.pill)
-                        .tap { vm.reminderHours = h }.padding(horizontal = 16.dp, vertical = 7.dp),
-                ) { Txt("${h}h", TtoType.Body.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold), color = if (selected) Color.White else TtoColor.Ink) }
+                    Modifier.weight(1f).height(44.dp).clip(TtoRadius.pill)
+                        .background(if (selected) TtoColor.Ink else TtoColor.Paper)
+                        .border(2.dp, TtoColor.Ink, TtoRadius.pill)
+                        .tap { vm.reminderHours = h },
+                    contentAlignment = Alignment.Center,
+                ) { Txt("${h}h", TtoType.Chip, color = if (selected) TtoColor.Paper else TtoColor.Ink) }
             }
         }
     }
@@ -286,25 +285,28 @@ fun WidgetScreen(vm: OnboardingViewModel) = StepColumn(dots = 5) {
     }
     Column(
         Modifier.weight(1f).fillMaxWidth().padding(top = 18.dp, bottom = 14.dp)
-            .clip(RoundedCornerShape(18.dp)).background(TtoColor.OffWhite).padding(12.dp),
+            .clip(TtoRadius.xl).background(TtoColor.Teal).padding(12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Box(Modifier.width(36.dp).height(4.dp).clip(TtoRadius.pill).background(TtoColor.Faint).align(Alignment.CenterHorizontally))
-        Txt("Widgets", TtoType.Caption.copy(fontSize = 12.sp), color = TtoColor.GraySecondary)
+        Box(Modifier.width(40.dp).height(4.dp).clip(TtoRadius.pill).background(TtoColor.Paper).align(Alignment.CenterHorizontally))
+        Txt("Widgets", TtoType.Caption, color = TtoColor.InkMuted)
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Box(Modifier.weight(1f).height(54.dp).clip(RoundedCornerShape(12.dp)).background(TtoColor.Row))
-            Box(Modifier.weight(1f).height(54.dp).clip(RoundedCornerShape(12.dp)).background(TtoColor.Row))
+            Box(Modifier.weight(1f).height(54.dp).clip(TtoRadius.md).background(TtoColor.TealSoft))
+            Box(Modifier.weight(1f).height(54.dp).clip(TtoRadius.md).background(TtoColor.TealSoft))
         }
-        Column(Modifier.fillMaxWidth().clip(TtoRadius.md).background(TtoColor.Paper).border(1.5.dp, TtoColor.Ink, TtoRadius.md).padding(horizontal = 16.dp, vertical = 14.dp)) {
-            Txt("Things to Order", TtoType.Headline.copy(fontSize = 15.sp, lineHeight = 18.sp))
+        Column(Modifier.fillMaxWidth().clip(TtoRadius.xl).background(TtoColor.Green).padding(horizontal = 20.dp, vertical = 16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Txt("Things to Order", TtoType.ScreenTitle.copy(fontSize = 17.sp, lineHeight = 20.sp), Modifier.weight(1f))
+                FaceTile(FaceMood.Eager, 44.dp)
+            }
             listOf("Oat milk", "Bananas").forEach {
-                Row(Modifier.padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Image(painterResource(R.drawable.icon_checkbox_empty), null, Modifier.size(14.dp))
-                    Txt(it, TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.Normal))
+                Row(Modifier.padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    RoundCheck(false, 18.dp)
+                    Txt(it, TtoType.Body)
                 }
             }
         }
-        Txt("4×2 · drag to place", TtoType.Body.copy(fontSize = 12.sp, fontWeight = FontWeight.Normal), Modifier.align(Alignment.CenterHorizontally), color = TtoColor.GrayBody)
+        Txt("4×2 · drag to place", TtoType.BodySmall.copy(fontSize = 12.sp), Modifier.align(Alignment.CenterHorizontally), color = TtoColor.InkMuted)
     }
     val context = LocalContext.current
     val installed by rememberPermissionState(WidgetPinning::isInstalled)
@@ -331,16 +333,17 @@ fun NotificationsScreen(vm: OnboardingViewModel) = StepColumn(dots = 6) {
     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically)) {
         Image(painterResource(R.drawable.icon_bell), null, Modifier.height(25.dp).align(Alignment.CenterHorizontally))
         Row(
-            Modifier.fillMaxWidth().shadow(10.dp, RoundedCornerShape(16.dp)).background(TtoColor.Paper, RoundedCornerShape(16.dp)).padding(horizontal = 14.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            Modifier.fillMaxWidth().shadow(10.dp, TtoRadius.xl, ambientColor = TtoColor.Ink.copy(alpha = 0.16f), spotColor = TtoColor.Ink.copy(alpha = 0.16f))
+                .background(TtoColor.Paper, TtoRadius.xl).padding(horizontal = 16.dp, vertical = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Box(Modifier.size(28.dp).border(1.5.dp, TtoColor.Faint, RoundedCornerShape(8.dp)))
+            FaceTile(FaceMood.Eager, 44.dp)
             Column(Modifier.weight(1f)) {
                 Row {
                     Txt("Don't Forget", TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.Bold), Modifier.weight(1f))
                     Txt("now", TtoType.Body.copy(fontSize = 13.sp, fontWeight = FontWeight.Normal), color = TtoColor.GraySecondary)
                 }
-                Txt("4 things still on your list. Order them in one go?", TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.Normal, lineHeight = 20.sp), Modifier.padding(top = 2.dp), color = Color(0xFF3A3833))
+                Txt("4 things still on your list. Order them in one go?", TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.Normal, lineHeight = 20.sp), Modifier.padding(top = 2.dp), color = TtoColor.InkMuted)
             }
         }
     }
@@ -368,7 +371,7 @@ fun ConnectAppsScreen(vm: OnboardingViewModel) = StepColumn(dots = 7) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Box(Modifier.size(44.dp).clip(RoundedCornerShape(10.dp)).background(Color.White).padding(4.dp), contentAlignment = Alignment.Center) {
+                Box(Modifier.size(44.dp).clip(TtoRadius.sm).background(TtoColor.TealSoft).padding(4.dp), contentAlignment = Alignment.Center) {
                     Image(painterResource(app.logo), null, Modifier.fillMaxSize(), contentScale = ContentScale.Fit)
                 }
                 Txt(app.label, TtoType.Body.copy(fontWeight = FontWeight.Normal), Modifier.weight(1f))
@@ -377,10 +380,7 @@ fun ConnectAppsScreen(vm: OnboardingViewModel) = StepColumn(dots = 7) {
                         Txt("Coming soon", TtoType.Caption.copy(fontSize = 11.sp, letterSpacing = androidx.compose.ui.unit.TextUnit.Unspecified), color = TtoColor.GraySecondary)
                     }
                 } else {
-                    Image(
-                        painterResource(if (app in vm.apps) R.drawable.icon_checkbox_ticked else R.drawable.icon_checkbox_empty),
-                        null, Modifier.size(16.dp),
-                    )
+                    RoundCheck(app in vm.apps, 22.dp)
                 }
             }
             Rule()
@@ -418,13 +418,13 @@ fun UsageAccessScreen(vm: OnboardingViewModel) = StepColumn(dots = 8) {
 @Composable
 private fun SettingsMock() {
     Row(
-        Modifier.fillMaxWidth().clip(TtoRadius.md).background(TtoColor.Paper).border(1.5.dp, TtoColor.Ink, TtoRadius.md).padding(horizontal = 14.dp, vertical = 12.dp),
+        Modifier.fillMaxWidth().clip(TtoRadius.md).background(TtoColor.Paper).border(2.dp, TtoColor.Line, TtoRadius.md).padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Image(painterResource(R.drawable.logo_orange), null, Modifier.size(28.dp).padding(3.dp))
         Txt("Don't Forget", TtoType.Body.copy(fontWeight = FontWeight.SemiBold), Modifier.weight(1f))
-        Box(Modifier.width(40.dp).height(24.dp).clip(TtoRadius.pill).background(TtoColor.Line)) {
-            Box(Modifier.padding(3.dp).size(18.dp).clip(CircleShape).background(Color.White))
+        Box(Modifier.width(48.dp).height(28.dp).clip(TtoRadius.pill).background(TtoColor.Line)) {
+            Box(Modifier.padding(3.dp).size(22.dp).clip(CircleShape).background(TtoColor.Paper))
         }
     }
 }
@@ -449,7 +449,7 @@ fun OverlayScreen(vm: OnboardingViewModel) = StepColumn(dots = 9) {
         GrantedBlock("Pop-up is ready.", "Open Blinkit and your list will be waiting.")
         StepFooter("Continue", onPrimary = vm::next)
     } else {
-        Box(Modifier.weight(1f).fillMaxWidth().padding(top = 18.dp).clip(RoundedCornerShape(18.dp)).background(Color(0xFF7FBFC9))) {
+        Box(Modifier.weight(1f).fillMaxWidth().padding(top = 18.dp).clip(TtoRadius.xl).background(TtoColor.Teal)) {
             Image(painterResource(R.drawable.screenshot_blinkit_home), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop, alignment = Alignment.TopCenter)
             PopupCard(listOf("Oat milk", "Bananas", "Coffee beans"), Modifier.align(Alignment.BottomCenter).padding(10.dp).fillMaxWidth())
         }

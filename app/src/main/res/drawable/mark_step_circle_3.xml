@@ -6,7 +6,7 @@
     android:viewportHeight="60">
     <path
         android:pathData="M44 12.5C36.5 6.5 22.5 5.8 14.5 13.5 6.5 21.2 6.4 35.6 14 44c8 8.8 23.5 9.3 32 .8 8.1-8.1 8.2-21.9.6-29.8-5.8-6-15.4-7.8-22.8-4.8"
-        android:strokeColor="#171717"
+        android:strokeColor="#14293A"
         android:strokeWidth="2.2"
         android:strokeLineCap="round"
         android:strokeLineJoin="round" />

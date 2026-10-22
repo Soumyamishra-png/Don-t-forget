@@ -85,12 +85,12 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
     }
 }
 
-private val rowText = TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.Normal)
+private val rowText = TtoType.Body
 
 @Composable
 private fun ScreenHeader(title: String, onBack: () -> Unit) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Box(Modifier.size(40.dp).tap(onClick = onBack), contentAlignment = Alignment.CenterStart) {
+        Box(Modifier.size(44.dp).tap(onClick = onBack), contentAlignment = Alignment.CenterStart) {
             Txt("←", TtoType.ScreenTitle)
         }
         Txt(title, TtoType.ScreenTitle, Modifier.weight(1f))
@@ -99,7 +99,7 @@ private fun ScreenHeader(title: String, onBack: () -> Unit) {
 
 @Composable
 private fun SectionLabel(text: String, first: Boolean = false) =
-    Txt(text.uppercase(), TtoType.Caption, Modifier.padding(top = if (first) 20.dp else 26.dp, bottom = 4.dp), color = TtoColor.GraySecondary)
+    Txt(text.uppercase(), TtoType.Caption, Modifier.padding(top = if (first) 20.dp else 26.dp, bottom = 4.dp), color = TtoColor.InkMuted)
 
 @Composable
 private fun SettingRow(
@@ -111,7 +111,7 @@ private fun SettingRow(
 ) {
     Column {
         Row(
-            modifier.fillMaxWidth().then(if (onClick != null) Modifier.tap(onClick = onClick) else Modifier).padding(vertical = 11.dp),
+            modifier.fillMaxWidth().then(if (onClick != null) Modifier.tap(onClick = onClick) else Modifier).padding(vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -149,14 +149,14 @@ fun SettingsScreen(onBack: () -> Unit, onHelp: () -> Unit, onPrivacy: () -> Unit
                 app.label,
                 Modifier.alpha(if (app.comingSoon) 0.5f else 1f),
                 leading = {
-                    Box(Modifier.size(32.dp).clip(RoundedCornerShape(8.dp)).background(Color.White).padding(2.dp), contentAlignment = Alignment.Center) {
+                    Box(Modifier.size(32.dp).clip(TtoRadius.sm).background(TtoColor.TealSoft).padding(2.dp), contentAlignment = Alignment.Center) {
                         Image(painterResource(app.logo), null, Modifier.fillMaxSize(), contentScale = ContentScale.Fit)
                     }
                 },
             ) {
                 if (app.comingSoon) {
                     Box(Modifier.border(1.3.dp, TtoColor.Line, TtoRadius.pill).padding(horizontal = 9.dp, vertical = 3.dp)) {
-                        Txt("Coming soon", TtoType.Body.copy(fontSize = 11.sp, fontWeight = FontWeight.SemiBold), color = TtoColor.GraySecondary)
+                        Txt("Coming soon", TtoType.Tag, color = TtoColor.InkMuted)
                     }
                 } else {
                     ToggleSwitch(checked = app in apps, onCheckedChange = { vm.setWatched(app, it) })
@@ -204,7 +204,7 @@ fun SettingsScreen(onBack: () -> Unit, onHelp: () -> Unit, onPrivacy: () -> Unit
         SettingRow("Pop-up not showing?", onClick = onHelp) { Txt("›", TtoType.Body.copy(fontSize = 22.sp, fontWeight = FontWeight.Normal), color = TtoColor.GrayBody) }
         SettingRow("What we can see", onClick = onPrivacy) { Txt("›", TtoType.Body.copy(fontSize = 22.sp, fontWeight = FontWeight.Normal), color = TtoColor.GrayBody) }
 
-        Txt("Your list stays on this phone unless you share it.", TtoType.BodySmall.copy(fontSize = 12.sp), Modifier.fillMaxWidth().padding(top = 28.dp), color = TtoColor.GraySecondary, align = TextAlign.Center)
+        Txt("Your list stays on this phone unless you share it.", TtoType.BodySmall.copy(fontSize = 12.sp), Modifier.fillMaxWidth().padding(top = 28.dp), color = TtoColor.InkMuted, align = TextAlign.Center)
     }
 
     if (pickerOpen) {
@@ -222,40 +222,41 @@ private fun ReminderPicker(current: ReminderSetting, onSave: (ReminderMode?, Int
     var mode by remember { mutableStateOf(current.mode) }
     var hours by remember { mutableIntStateOf(current.hours) }
 
-    Box(Modifier.fillMaxSize().background(Color(0x6B171717)).tap(onClick = onDismiss)) {
+    Box(Modifier.fillMaxSize().background(TtoColor.Scrim).tap(onClick = onDismiss)) {
         Column(
             Modifier.align(Alignment.BottomCenter).fillMaxWidth()
-                .clip(RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp)).background(TtoColor.Paper)
-                .tap { }.navigationBarsPadding().padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 24.dp),
+                .clip(TtoRadius.sheet).background(TtoColor.Paper)
+                .tap { }.navigationBarsPadding().padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 16.dp),
         ) {
-            Box(Modifier.size(width = 36.dp, height = 4.dp).clip(TtoRadius.pill).background(TtoColor.Faint).align(Alignment.CenterHorizontally))
-            Txt("Remind me", TtoType.SectionTitle, Modifier.padding(top = 14.dp))
-            Column(Modifier.padding(top = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Box(Modifier.size(width = 40.dp, height = 4.dp).clip(TtoRadius.pill).background(TtoColor.Line).align(Alignment.CenterHorizontally))
+            Txt("Remind me", TtoType.SheetTitle, Modifier.padding(top = 16.dp))
+            Column(Modifier.padding(top = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 RadioRow("Off", mode == null) { mode = null }
                 RadioRow("Once a day", mode == ReminderMode.Once) { mode = ReminderMode.Once }
                 RadioRow("Twice a day", mode == ReminderMode.Twice) { mode = ReminderMode.Twice }
                 RadioRow("Custom", mode == ReminderMode.Custom) { mode = ReminderMode.Custom }
             }
             if (mode == ReminderMode.Custom) {
-                Txt("EVERY", TtoType.Caption, Modifier.padding(top = 16.dp), color = TtoColor.GraySecondary)
+                Txt("EVERY", TtoType.Caption, Modifier.padding(top = 16.dp), color = TtoColor.InkMuted)
                 Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     listOf(2, 4, 6, 8).forEach { h ->
                         val selected = hours == h
                         Box(
-                            Modifier.clip(TtoRadius.pill).background(if (selected) TtoColor.Ink else Color.Transparent)
-                                .border(1.5.dp, TtoColor.Ink, TtoRadius.pill).tap { hours = h }.padding(horizontal = 16.dp, vertical = 7.dp),
-                        ) { Txt("${h}h", TtoType.Body.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold), color = if (selected) Color.White else TtoColor.Ink) }
+                            Modifier.weight(1f).height(44.dp).clip(TtoRadius.pill).background(if (selected) TtoColor.Ink else TtoColor.Paper)
+                                .border(2.dp, TtoColor.Ink, TtoRadius.pill).tap { hours = h },
+                            contentAlignment = Alignment.Center,
+                        ) { Txt("${h}h", TtoType.Chip, color = if (selected) TtoColor.Paper else TtoColor.Ink) }
                     }
                 }
             }
-            Box(Modifier.padding(top = 20.dp)) { PrimaryButton("Save", onClick = { onSave(mode, hours) }) }
+            Box(Modifier.padding(top = 24.dp)) { PrimaryButton("Save", onClick = { onSave(mode, hours) }) }
         }
     }
 }
 
 @Composable
 private fun PermissionValue(granted: Boolean) {
-    if (granted) ValueText("On", bold = true) else ValueText("Off · Turn on", bold = true, color = TtoColor.Orange)
+    if (granted) ValueText("On", bold = true) else ValueText("Off · Turn on", bold = true, color = TtoColor.CoralDeep)
 }
 
 @Composable
@@ -266,8 +267,8 @@ fun HelpScreen(onBack: () -> Unit, onCheckPermissions: () -> Unit) {
         ScreenHeader("Pop-up not showing?", onBack)
         Txt(
             "Some phones stop background apps to save battery. Check these three, in order.",
-            TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.Normal, lineHeight = 20.sp),
-            Modifier.padding(top = 14.dp), color = TtoColor.GrayBody,
+            TtoType.BodySmall,
+            Modifier.padding(top = 14.dp), color = TtoColor.InkMuted,
         )
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(top = 20.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
             HelpStep(circles[0], 1, "Permissions still on", "Usage Access and Draw over other apps.", "Check permissions", onCheckPermissions)
@@ -278,7 +279,7 @@ fun HelpScreen(onBack: () -> Unit, onCheckPermissions: () -> Unit) {
         PrimaryButton("Send a test pop-up", enabled = overlayOn, onClick = { OverlayController.showTest() })
         Txt(
             if (overlayOn) "Shows for 5 seconds over whatever is on screen." else "Turn on Draw over other apps first.",
-            TtoType.BodySmall.copy(fontSize = 12.sp), Modifier.fillMaxWidth().padding(top = 8.dp), color = TtoColor.GraySecondary, align = TextAlign.Center,
+            TtoType.BodySmall.copy(fontSize = 12.sp), Modifier.fillMaxWidth().padding(top = 8.dp), color = TtoColor.InkMuted, align = TextAlign.Center,
         )
     }
 }
@@ -292,12 +293,12 @@ private fun HelpStep(circle: Int, number: Int, title: String, body: String, acti
         }
         Column(Modifier.weight(1f)) {
             Txt(title, TtoType.Body.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold))
-            Txt(body, TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.Normal, lineHeight = 20.sp), Modifier.padding(top = 2.dp), color = TtoColor.GrayBody)
+            Txt(body, TtoType.BodySmall, Modifier.padding(top = 2.dp), color = TtoColor.InkMuted)
             if (action != null && onAction != null) {
                 Txt(
                     action,
-                    TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.SemiBold, textDecoration = TextDecoration.Underline),
-                    Modifier.padding(top = 6.dp).tap(onClick = onAction).padding(vertical = 4.dp),
+                    TtoType.Button.copy(fontSize = 14.sp),
+                    Modifier.padding(top = 4.dp).tap(onClick = onAction).padding(vertical = 10.dp), color = TtoColor.GreenDeep,
                 )
             }
         }

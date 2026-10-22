@@ -4,16 +4,20 @@ import com.thingstoorder.app.R
 import com.thingstoorder.app.data.Item
 import com.thingstoorder.app.data.StaleSort
 
-// The "Typing / listening" state from the design exists only once voice input is built; it is
-// deliberately not a case here yet.
-enum class WidgetMascotState(val stripColor: Long, val face: Int, val faceIsLight: Boolean) {
-    Empty(0xFF9AD4FF, R.drawable.mark_face_neutral, faceIsLight = false),
-    Eager(0xFFFF5E1A, R.drawable.mark_face_eager, faceIsLight = false),
-    Stale(0xFFC2410C, R.drawable.mark_face_stale, faceIsLight = true),
-    AllDone(0xFF1F6BFF, R.drawable.mark_face_happy, faceIsLight = true);
+/**
+ * The widget's mood. Each mood is a whole-surface colour with a face tile (Mint Line):
+ * empty on paper, listening on mint, eager on green, stale (pleading) on coral, all done on ink.
+ */
+enum class WidgetMascotState(val card: Int, val pill: Int, val tile: Int, val onInk: Boolean) {
+    Empty(R.drawable.widget_card_empty, R.drawable.widget_pill_empty, R.drawable.face_tile_neutral, onInk = false),
+    Listening(R.drawable.widget_card_listening, R.drawable.widget_pill_listening, R.drawable.face_tile_listening, onInk = false),
+    Eager(R.drawable.widget_card_eager, R.drawable.widget_pill_eager, R.drawable.face_tile_eager, onInk = false),
+    Stale(R.drawable.widget_card_stale, R.drawable.widget_pill_stale, R.drawable.face_tile_pleading, onInk = false),
+    AllDone(R.drawable.widget_card_alldone, R.drawable.widget_pill_alldone, R.drawable.face_tile_happy, onInk = true);
 
     companion object {
-        fun of(items: List<Item>, now: Long): WidgetMascotState {
+        fun of(items: List<Item>, now: Long, listening: Boolean = false): WidgetMascotState {
+            if (listening) return Listening
             if (items.isEmpty()) return Empty
             val remaining = items.filter { !it.checked }
             if (remaining.isEmpty()) return AllDone
@@ -35,9 +39,14 @@ object WidgetCopyBuilder {
 
         return when (state) {
             WidgetMascotState.Empty -> WidgetCopy(
-                caption = "Nothing here yet. What's running low?",
+                caption = "Nothing here yet.",
                 pillLabel = "Add something",
                 takeoverLine = "Need anything?",
+            )
+            WidgetMascotState.Listening -> WidgetCopy(
+                caption = "Listening…",
+                pillLabel = "Listening…",
+                takeoverLine = "Listening…",
             )
             WidgetMascotState.Eager -> WidgetCopy(
                 caption = "Ready when you are.",

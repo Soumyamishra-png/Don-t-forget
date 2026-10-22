@@ -54,10 +54,10 @@ class QuickAddActivity : ComponentActivity() {
             Box(Modifier.fillMaxSize().tap { finish() }) {
                 Column(
                     Modifier.align(Alignment.BottomCenter).fillMaxWidth().imePadding().navigationBarsPadding()
-                        .padding(12.dp).clip(RoundedCornerShape(24.dp)).background(TtoColor.Paper)
+                        .padding(12.dp).clip(com.thingstoorder.app.ui.theme.TtoRadius.xl).background(TtoColor.Paper)
                         .tap { }.padding(20.dp),
                 ) {
-                    Txt("Add something", TtoType.Headline.copy(fontSize = 22.sp, lineHeight = 26.sp))
+                    Txt("Add something", TtoType.SheetTitle)
                     AddField(
                         value = text,
                         onValueChange = { text = it },

@@ -37,6 +37,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -65,7 +67,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /** One colour per seat: orange, blue, green, purple. */
-val MemberColors = listOf(Color(0xFFFF5E1A), Color(0xFF4FB3FF), Color(0xFF2FB67C), Color(0xFFB57BFF))
+val MemberColors = listOf(TtoColor.PersonYou, TtoColor.Person2, TtoColor.Person3, TtoColor.Person4)
 
 class SharedViewModel(app: Application) : AndroidViewModel(app) {
     private val repo = SharedLists.get(app)
@@ -131,13 +133,13 @@ fun ShareSheet(onDismiss: () -> Unit, vm: SharedViewModel = viewModel()) {
     var confirmLeave by rememberSaveable { mutableStateOf(false) }
     androidx.compose.runtime.LaunchedEffect(savedName) { if (name.isEmpty() && !savedName.isNullOrEmpty()) name = savedName.orEmpty() }
 
-    Box(Modifier.fillMaxSize().background(Color(0x6B171717)).tap(onClick = onDismiss)) {
+    Box(Modifier.fillMaxSize().background(TtoColor.Scrim).tap(onClick = onDismiss)) {
         Column(
             Modifier.align(Alignment.BottomCenter).fillMaxWidth().imePadding()
-                .clip(RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp)).background(TtoColor.Paper)
-                .tap { }.navigationBarsPadding().padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 24.dp),
+                .clip(TtoRadius.sheet).background(TtoColor.Paper)
+                .tap { }.navigationBarsPadding().padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 16.dp),
         ) {
-            Box(Modifier.size(width = 36.dp, height = 4.dp).clip(TtoRadius.pill).background(TtoColor.Faint).align(Alignment.CenterHorizontally))
+            Box(Modifier.size(width = 40.dp, height = 4.dp).clip(TtoRadius.pill).background(TtoColor.Line).align(Alignment.CenterHorizontally))
 
             when {
                 sharedId != null -> SharedView(
@@ -167,7 +169,7 @@ fun ShareSheet(onDismiss: () -> Unit, vm: SharedViewModel = viewModel()) {
 
 @Composable
 private fun ColumnScope.CreateView(vm: SharedViewModel, name: String, onName: (String) -> Unit, onCreate: () -> Unit, onJoin: () -> Unit) {
-    Txt("Order together", TtoType.SectionTitle, Modifier.padding(top = 14.dp))
+    Txt("Order together", TtoType.SheetTitle, Modifier.padding(top = 16.dp))
     Txt(
         "Anyone with the code can add to this list. Up to $MAX_MEMBERS people.",
         TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.Normal, lineHeight = 20.sp),
@@ -179,7 +181,7 @@ private fun ColumnScope.CreateView(vm: SharedViewModel, name: String, onName: (S
     val can = name.isNotBlank() && !vm.busy
     Box(
         Modifier.padding(top = 18.dp).fillMaxWidth().clip(TtoRadius.md).background(if (can) TtoColor.Ink else TtoColor.Line)
-            .tap(can, onClick = onCreate).padding(vertical = 15.dp),
+            .tap(can, onClick = onCreate).height(52.dp),
         contentAlignment = Alignment.Center,
     ) { Txt(if (vm.busy) "Making your code…" else "Create code", TtoType.Button, color = Color.White) }
     Txt(
@@ -199,7 +201,7 @@ private fun ColumnScope.SharedView(
     val members = shared?.members.orEmpty()
     val iAmOwner = shared?.ownerUid == me
 
-    Txt("Order together", TtoType.SectionTitle, Modifier.padding(top = 14.dp))
+    Txt("Order together", TtoType.SheetTitle, Modifier.padding(top = 16.dp))
     Txt(
         "Anyone with the code can add to this list. Up to $MAX_MEMBERS people.",
         TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.Normal, lineHeight = 20.sp),
@@ -209,9 +211,9 @@ private fun ColumnScope.SharedView(
         Modifier.padding(top = 16.dp).fillMaxWidth().clip(TtoRadius.md).background(TtoColor.OffWhite).padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Txt(code.chunked(3).joinToString(" "), TtoType.SectionTitle.copy(letterSpacing = 3.sp), Modifier.weight(1f))
-        Box(Modifier.clip(TtoRadius.pill).background(TtoColor.Ink).tap(onClick = onCopy).padding(horizontal = 16.dp, vertical = 8.dp)) {
-            Txt("Copy", TtoType.Body.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold), color = Color.White)
+        Txt(code.chunked(3).joinToString(" "), TtoType.ScreenTitle.copy(letterSpacing = 3.sp), Modifier.weight(1f))
+        Box(Modifier.height(44.dp).tap(onClick = onCopy).padding(horizontal = 12.dp), contentAlignment = Alignment.Center) {
+            Txt("Copy", TtoType.Button.copy(fontSize = 14.sp), color = TtoColor.GreenDeep)
         }
     }
 
@@ -232,14 +234,14 @@ private fun ColumnScope.SharedView(
     }
     ErrorText(vm.error)
     Box(
-        Modifier.padding(top = 16.dp).fillMaxWidth().clip(TtoRadius.md).background(TtoColor.Ink).tap(onClick = onInvite).padding(vertical = 15.dp),
+        Modifier.padding(top = 16.dp).fillMaxWidth().clip(TtoRadius.md).background(TtoColor.Ink).tap(onClick = onInvite).height(52.dp),
         contentAlignment = Alignment.Center,
     ) { Txt("Send invite code", TtoType.Button, color = Color.White) }
     Txt(
         if (confirmLeave) "Tap again to leave. Your items stay on this phone." else "Leave this list",
         TtoType.Body.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold, textDecoration = TextDecoration.Underline),
         Modifier.align(Alignment.CenterHorizontally).padding(top = 8.dp).tap(onClick = onLeaveTap).padding(8.dp),
-        color = if (confirmLeave) TtoColor.OrangeText else TtoColor.GrayBody,
+        color = TtoColor.CoralDeep,
     )
 }
 
@@ -251,8 +253,8 @@ private fun MemberRow(name: String, color: Int, trailing: String?, onRemove: (()
         if (onRemove != null) {
             Txt(
                 "Remove",
-                TtoType.Body.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold, textDecoration = TextDecoration.Underline),
-                Modifier.tap(onClick = onRemove).padding(6.dp), color = TtoColor.GrayBody,
+                TtoType.Button.copy(fontSize = 14.sp),
+                Modifier.tap(onClick = onRemove).padding(horizontal = 6.dp, vertical = 12.dp), color = TtoColor.CoralDeep,
             )
         } else if (trailing != null) {
             Txt(trailing, TtoType.BodySmall, color = TtoColor.GraySecondary)
@@ -265,7 +267,7 @@ private fun ColumnScope.JoinCodeView(
     vm: SharedViewModel, code: String, onCode: (String) -> Unit, name: String, onName: (String) -> Unit,
     onBack: () -> Unit, onContinue: () -> Unit,
 ) {
-    Txt("Join a list", TtoType.SectionTitle, Modifier.padding(top = 14.dp))
+    Txt("Join a list", TtoType.SheetTitle, Modifier.padding(top = 16.dp))
     Txt(
         "Type the code you were sent.",
         TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.Normal), Modifier.padding(top = 4.dp), color = TtoColor.GrayBody,
@@ -278,7 +280,7 @@ private fun ColumnScope.JoinCodeView(
     val can = code.length >= 4 && name.isNotBlank() && !vm.busy
     Box(
         Modifier.padding(top = 18.dp).fillMaxWidth().clip(TtoRadius.md).background(if (can) TtoColor.Ink else TtoColor.Line)
-            .tap(can, onClick = onContinue).padding(vertical = 15.dp),
+            .tap(can, onClick = onContinue).height(52.dp),
         contentAlignment = Alignment.Center,
     ) { Txt("Continue", TtoType.Button, color = Color.White) }
     Txt("Back", TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.SemiBold), Modifier.align(Alignment.CenterHorizontally).padding(top = 6.dp).tap(onClick = onBack).padding(8.dp), color = TtoColor.GrayBody)
@@ -309,7 +311,7 @@ private fun ColumnScope.ConfirmView(vm: SharedViewModel, onJoin: () -> Unit, onB
     ErrorText(vm.error)
     Box(
         Modifier.padding(top = 20.dp).fillMaxWidth().clip(TtoRadius.md).background(if (vm.busy) TtoColor.Line else TtoColor.Ink)
-            .tap(!vm.busy, onClick = onJoin).padding(vertical = 15.dp),
+            .tap(!vm.busy, onClick = onJoin).height(52.dp),
         contentAlignment = Alignment.Center,
     ) { Txt(if (vm.busy) "Joining…" else "Join list", TtoType.Button, color = Color.White) }
     Txt("Not now", TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.SemiBold), Modifier.align(Alignment.CenterHorizontally).padding(top = 6.dp).tap(onClick = onBack).padding(8.dp), color = TtoColor.GrayBody)
@@ -325,7 +327,7 @@ private fun SheetInput(
     value: String, onChange: (String) -> Unit, placeholder: String, modifier: Modifier, ime: ImeAction,
     caps: KeyboardCapitalization = KeyboardCapitalization.Words,
 ) {
-    Box(modifier.fillMaxWidth().border(1.5.dp, TtoColor.Line, TtoRadius.md).padding(horizontal = 16.dp, vertical = 14.dp)) {
+    Box(modifier.fillMaxWidth().border(2.dp, TtoColor.LineStrong, TtoRadius.md).padding(horizontal = 16.dp, vertical = 16.dp)) {
         if (value.isEmpty()) Txt(placeholder, TtoType.Body.copy(fontWeight = FontWeight.Normal), color = TtoColor.Faint)
         BasicTextField(
             value = value, onValueChange = onChange, singleLine = true,
@@ -347,19 +349,23 @@ private fun copy(context: Context, code: String) {
     clipboard.setPrimaryClip(ClipData.newPlainText("Don't Forget code", code))
 }
 
+/** Header pill: "Share list" in ink, or an avatar stack with the member count once the list is shared. */
 @Composable
 fun SharePill(onClick: () -> Unit, members: List<Int>, modifier: Modifier = Modifier) {
+    val shared = members.isNotEmpty()
     Row(
-        modifier.clip(TtoRadius.pill).background(TtoColor.Ink).tap(onClick = onClick).padding(horizontal = 14.dp, vertical = 8.dp),
+        modifier.height(36.dp).clip(TtoRadius.pill).background(if (shared) TtoColor.TealSoft else TtoColor.Ink).tap(onClick = onClick)
+            .semantics { contentDescription = if (shared) "Shared with ${members.size} people. Open sharing." else "Share list" }
+            .padding(horizontal = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (members.isEmpty()) {
-            Txt("Share list", TtoType.Body.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold), color = Color.White)
+        if (!shared) {
+            Txt("Share list", TtoType.Chip, color = TtoColor.Paper)
         } else {
             Row(horizontalArrangement = Arrangement.spacedBy((-4).dp)) {
-                members.forEach { Box(Modifier.size(14.dp).clip(CircleShape).background(MemberColors[it.coerceIn(0, MemberColors.lastIndex)]).border(1.5.dp, TtoColor.Ink, CircleShape)) }
+                members.forEach { Box(Modifier.size(14.dp).clip(CircleShape).background(MemberColors[it.coerceIn(0, MemberColors.lastIndex)])) }
             }
-            Txt("${members.size}", TtoType.Body.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold), Modifier.padding(start = 8.dp), color = Color.White)
+            Txt("${members.size}", TtoType.Chip, Modifier.padding(start = 8.dp), color = TtoColor.Ink)
         }
     }
 }

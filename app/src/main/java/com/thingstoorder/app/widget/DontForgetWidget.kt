@@ -13,6 +13,7 @@ import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
+import androidx.glance.LocalSize
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.actionParametersOf
 import androidx.glance.action.clickable
@@ -21,8 +22,6 @@ import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionRunCallback
-import androidx.glance.appwidget.lazy.LazyColumn
-import androidx.glance.appwidget.lazy.items
 import androidx.glance.appwidget.provideContent
 import androidx.glance.appwidget.updateAll
 import androidx.glance.background
@@ -46,23 +45,25 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.thingstoorder.app.R
 import com.thingstoorder.app.data.AppDatabase
-import com.thingstoorder.app.data.ItemStore
-import com.thingstoorder.app.data.shared.SharedLists
 import com.thingstoorder.app.data.Item
+import com.thingstoorder.app.data.ItemStore
 import com.thingstoorder.app.data.SettingsRepository
+import com.thingstoorder.app.data.StaleSort
+import com.thingstoorder.app.data.StaleTier
+import com.thingstoorder.app.data.shared.SharedLists
 import kotlinx.coroutines.flow.first
 
-private val Ink = Color(0xFF171717)
-private val Line = Color(0xFFEDEAE1)
-private val Faint = Color(0xFFB7B2A6)
-private val QtyColor = Color(0xFFC24A00)
-private val GrayBody = Color(0xFF6E6B64)
-private val Orange = Color(0xFFFF5E1A)
+// Mint Line colours, as used on the widget surfaces.
+private val Ink = Color(0xFF14293A)
+private val InkMuted = Color(0xFF4A5F6B)
+private val Paper = Color(0xFFFFFFFF)
+private val Mint = Color(0xFFBDF2D5)
 
 private val ItemIdKey = ActionParameters.Key<Long>("item_id")
 
 class DontForgetWidget : GlanceAppWidget() {
-    override val sizeMode = SizeMode.Single
+    // Rows adapt to the card's height: 3 on the default card, up to 5 when it is made taller.
+    override val sizeMode = SizeMode.Exact
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val dao = AppDatabase.get(context).itemDao()
@@ -70,13 +71,15 @@ class DontForgetWidget : GlanceAppWidget() {
         val initialItems = dao.getAll()
         val initialMinimized = settings.widgetMinimized.first()
         val initialTakeover = settings.widgetTakeoverUntil.first()
+        val initialListening = settings.widgetListeningUntil.first()
         provideContent {
             val items by dao.observeAll().collectAsState(initialItems)
             val minimized by settings.widgetMinimized.collectAsState(initialMinimized)
             val takeoverUntil by settings.widgetTakeoverUntil.collectAsState(initialTakeover)
+            val listeningUntil by settings.widgetListeningUntil.collectAsState(initialListening)
             val members by SharedLists.get(context).current.collectAsState()
             val dots = members?.members?.associate { it.uid to it.color } ?: emptyMap()
-            WidgetContent(context, items, minimized, takeoverUntil, dots)
+            WidgetContent(context, items, minimized, takeoverUntil, listeningUntil, dots)
         }
     }
 }
@@ -107,7 +110,7 @@ class ToggleMinimizeAction : ActionCallback {
     }
 }
 
-// Dismisses the full-color takeover and opens the voice sheet in one tap.
+// Dismisses the full-colour takeover and opens the voice sheet in one tap.
 class DismissTakeoverAction : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
         SettingsRepository(context).setWidgetTakeoverUntil(null)
@@ -128,16 +131,26 @@ class VoiceFromWidgetAction : ActionCallback {
 }
 
 @Composable
-private fun WidgetContent(context: Context, items: List<Item>, minimized: Boolean, takeoverUntil: Long?, dots: Map<String, Int>) {
+private fun WidgetContent(
+    context: Context, items: List<Item>, minimized: Boolean, takeoverUntil: Long?, listeningUntil: Long?, dots: Map<String, Int>,
+) {
     val now = System.currentTimeMillis()
-    val state = WidgetMascotState.of(items, now)
+    val listening = listeningUntil != null && now < listeningUntil
+    val state = WidgetMascotState.of(items, now, listening)
     val copy = WidgetCopyBuilder.forState(state, items, now)
     val remaining = items.count { !it.checked }
     when {
         takeoverUntil != null && now < takeoverUntil -> Takeover(context, state, copy)
         minimized -> MinimizedPill(context, state, copy)
-        else -> Expanded(context, items, remaining, state, copy, dots)
+        else -> Expanded(context, items, remaining, state, copy, dots, now)
     }
+}
+
+private fun textOn(state: WidgetMascotState) = if (state.onInk) Paper else Ink
+private fun moodOn(state: WidgetMascotState) = when (state) {
+    WidgetMascotState.AllDone -> Mint
+    WidgetMascotState.Eager, WidgetMascotState.Stale -> Ink
+    else -> InkMuted
 }
 
 @Composable
@@ -159,189 +172,209 @@ private fun BitmapText(bitmap: SizedBitmap, description: String) =
         contentScale = ContentScale.Fit,
     )
 
-private fun stripDrawable(state: WidgetMascotState) = when (state) {
-    WidgetMascotState.Empty -> R.drawable.widget_strip_empty
-    WidgetMascotState.Eager -> R.drawable.widget_strip_eager
-    WidgetMascotState.Stale -> R.drawable.widget_strip_stale
-    WidgetMascotState.AllDone -> R.drawable.widget_strip_alldone
-}
-
-private fun takeoverDrawable(state: WidgetMascotState) = when (state) {
-    WidgetMascotState.Empty -> R.drawable.widget_takeover_empty
-    WidgetMascotState.Eager -> R.drawable.widget_takeover_eager
-    WidgetMascotState.Stale -> R.drawable.widget_takeover_stale
-    WidgetMascotState.AllDone -> R.drawable.widget_takeover_alldone
-}
-
-private fun pillDrawable(state: WidgetMascotState) = when (state) {
-    WidgetMascotState.Empty -> R.drawable.widget_pill_empty
-    WidgetMascotState.Eager -> R.drawable.widget_pill_eager
-    WidgetMascotState.Stale -> R.drawable.widget_pill_stale
-    WidgetMascotState.AllDone -> R.drawable.widget_pill_alldone
-}
-
 private val DOT_DRAWABLES = listOf(R.drawable.dot_member_0, R.drawable.dot_member_1, R.drawable.dot_member_2, R.drawable.dot_member_3)
 
-private const val STRIP_HEIGHT_DP = 76
-private const val STRIP_FACE_DP = 48
-private const val PILL_FACE_DP = 34
-private const val TAKEOVER_FACE_DP = 72
+private const val HEAD_DP = 56
+private const val ROW_DP = 34
+private const val FOOTER_DP = 44
 
 @Composable
-private fun MascotStrip(state: WidgetMascotState) {
-    val iconTint = if (state.faceIsLight) Color.White else Ink
+private fun Expanded(
+    context: Context, items: List<Item>, remaining: Int, state: WidgetMascotState, copy: WidgetCopy,
+    dots: Map<String, Int>, now: Long,
+) {
+    val height = LocalSize.current.height.value.toInt()
+    // 16dp padding top and bottom, header, two 8dp gaps and the footer come off the card's height.
+    val rowsFit = ((height + 40 - 32 - HEAD_DP - 16 - FOOTER_DP) / ROW_DP).coerceIn(1, 5)
+    val arranged = StaleSort.arrange(items, now)
+    val shown = arranged.take(rowsFit)
+    val tint = textOn(state)
+
+    Column(GlanceModifier.fillMaxSize().background(ImageProvider(state.card)).padding(16.dp)) {
+        Row(GlanceModifier.fillMaxWidth().height(HEAD_DP.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(GlanceModifier.defaultWeight()) {
+                BitmapText(
+                    WidgetBitmaps.text(context, "Things to Order", 20f, if (state.onInk) 0xFFFFFFFF.toInt() else 0xFF14293A.toInt()),
+                    "Things to Order",
+                )
+                Spacer(GlanceModifier.height(4.dp))
+                if (state == WidgetMascotState.Eager && remaining > 0) CountPill(remaining) else MoodLine(copy.caption, state)
+            }
+            Box(GlanceModifier.size(36.dp).clickable(actionRunCallback<ToggleMinimizeAction>()), contentAlignment = Alignment.Center) {
+                Icon(R.drawable.icon_chevron, 20, tint = tint, description = "Minimise")
+            }
+            Image(
+                provider = ImageProvider(state.tile),
+                contentDescription = null,
+                modifier = GlanceModifier.size(HEAD_DP.dp),
+                contentScale = ContentScale.Fit,
+            )
+        }
+        Spacer(GlanceModifier.height(8.dp))
+        Column(GlanceModifier.fillMaxWidth().defaultWeight()) {
+            if (shown.isEmpty()) {
+                Spacer(GlanceModifier.defaultWeight())
+            } else {
+                shown.forEach { ItemRow(it, state, dots[it.addedBy], showAge = state == WidgetMascotState.Stale, now = now) }
+            }
+        }
+        Spacer(GlanceModifier.height(8.dp))
+        when {
+            state == WidgetMascotState.Listening -> ListeningFooter()
+            items.isEmpty() -> AddFooter()
+            else -> MicFooter()
+        }
+    }
+}
+
+@Composable
+private fun MoodLine(text: String, state: WidgetMascotState) {
+    Text(text, style = TextStyle(color = ColorProvider(moodOn(state)), fontSize = 14.sp), maxLines = 1)
+}
+
+/** "3 to order": a paper pill with an ink badge, shown on the eager (green) state. */
+@Composable
+private fun CountPill(count: Int) {
     Row(
-        GlanceModifier.fillMaxWidth().height(STRIP_HEIGHT_DP.dp).background(ImageProvider(stripDrawable(state))).padding(horizontal = 10.dp),
+        GlanceModifier.background(ImageProvider(R.drawable.widget_count_pill)).padding(start = 4.dp, end = 10.dp, top = 3.dp, bottom = 3.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(GlanceModifier.size(36.dp)) {}
-        Box(GlanceModifier.defaultWeight(), contentAlignment = Alignment.Center) {
-            Icon(state.face, STRIP_FACE_DP, description = null)
+        Box(GlanceModifier.size(20.dp).background(ImageProvider(R.drawable.widget_badge_ink)), contentAlignment = Alignment.Center) {
+            Text("$count", style = TextStyle(color = ColorProvider(Paper), fontSize = 11.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center))
         }
-        Box(GlanceModifier.size(36.dp).clickable(actionRunCallback<AddFromStripAction>()), contentAlignment = Alignment.Center) {
-            Icon(R.drawable.icon_plus, 18, tint = iconTint, description = "Add item")
-        }
-        Box(GlanceModifier.size(36.dp).clickable(actionRunCallback<ToggleMinimizeAction>()), contentAlignment = Alignment.Center) {
-            Icon(R.drawable.icon_chevron, 18, tint = iconTint, description = "Minimize")
-        }
-    }
-}
-
-class AddFromStripAction : ActionCallback {
-    override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
-        context.startActivity(
-            Intent().setClassName("com.thingstoorder.app", QuickAddActivity::class.java.name)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-        )
+        Spacer(GlanceModifier.width(6.dp))
+        Text("to order", style = TextStyle(color = ColorProvider(Ink), fontSize = 13.sp, fontWeight = FontWeight.Medium))
     }
 }
 
 @Composable
-private fun Expanded(context: Context, items: List<Item>, remaining: Int, state: WidgetMascotState, copy: WidgetCopy, dots: Map<String, Int>) {
-    Column(GlanceModifier.fillMaxSize().background(ImageProvider(R.drawable.widget_card_bg))) {
-        MascotStrip(state)
-        Column(GlanceModifier.fillMaxWidth().defaultWeight().padding(start = 18.dp, end = 12.dp, top = 10.dp, bottom = 8.dp)) {
-            Row(GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                BitmapText(WidgetBitmaps.text(context, "Things to Order", 16f, 0xFF171717.toInt()), "Things to Order")
-                if (remaining > 0) {
-                    Spacer(GlanceModifier.width(8.dp))
-                    BitmapText(WidgetBitmaps.badge(context, remaining), "$remaining to order")
-                }
-            }
-            if (items.isEmpty()) {
-                EmptyBody()
-            } else {
-                Spacer(GlanceModifier.height(6.dp))
-                LazyColumn(GlanceModifier.fillMaxWidth().defaultWeight()) {
-                    items(items, itemId = { it.id }) { ItemRow(it, dots[it.addedBy]) }
-                }
-                Spacer(GlanceModifier.height(8.dp))
-                MicRow()
-            }
-        }
-    }
-}
-
-@Composable
-private fun MicRow() {
+private fun MicFooter() {
     Row(
-        GlanceModifier.fillMaxWidth().height(48.dp).background(ImageProvider(R.drawable.widget_btn_black))
+        GlanceModifier.fillMaxWidth().height(FOOTER_DP.dp).background(ImageProvider(R.drawable.widget_btn_onpaper))
             .clickable(actionRunCallback<VoiceFromWidgetAction>()),
         verticalAlignment = Alignment.CenterVertically,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Icon(R.drawable.icon_mic, 20, tint = Color.White, description = null)
+        Icon(R.drawable.icon_mic, 20, description = null)
         Spacer(GlanceModifier.width(8.dp))
-        Text("Tap to say it", style = TextStyle(color = ColorProvider(Color.White), fontSize = 15.sp, fontWeight = FontWeight.Bold), maxLines = 1)
+        Text("Tap to say it", style = TextStyle(color = ColorProvider(Ink), fontSize = 15.sp, fontWeight = FontWeight.Bold), maxLines = 1)
     }
 }
 
 @Composable
-private fun ItemRow(item: Item, dot: Int?) {
-    Column(GlanceModifier.fillMaxWidth()) {
-        Row(GlanceModifier.fillMaxWidth().height(38.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                GlanceModifier.size(width = 34.dp, height = 38.dp)
-                    .clickable(actionRunCallback<ToggleItemAction>(actionParametersOf(ItemIdKey to item.id))),
-                contentAlignment = Alignment.CenterStart,
-            ) { Icon(if (item.checked) R.drawable.icon_checkbox_ticked else R.drawable.icon_checkbox_empty, 18, description = if (item.checked) "Mark not done: ${item.name}" else "Mark done: ${item.name}") }
-            if (dot != null) {
-                Image(
-                    provider = ImageProvider(DOT_DRAWABLES[dot.coerceIn(0, 3)]),
-                    contentDescription = null,
-                    modifier = GlanceModifier.size(8.dp),
-                )
-                Spacer(GlanceModifier.width(8.dp))
-            }
-            Text(
-                item.name,
-                modifier = GlanceModifier.defaultWeight(),
-                style = TextStyle(
-                    color = ColorProvider(if (item.checked) Faint else Ink),
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Medium,
-                    textDecoration = if (item.checked) TextDecoration.LineThrough else TextDecoration.None,
-                ),
-                maxLines = 1,
+private fun ListeningFooter() {
+    Row(
+        GlanceModifier.fillMaxWidth().height(FOOTER_DP.dp).background(ImageProvider(R.drawable.widget_btn_onpaper)),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Icon(R.drawable.icon_mic, 20, description = null)
+        Spacer(GlanceModifier.width(8.dp))
+        Text("Listening…", style = TextStyle(color = ColorProvider(InkMuted), fontSize = 15.sp, fontWeight = FontWeight.Medium), maxLines = 1)
+    }
+}
+
+@Composable
+private fun AddFooter() {
+    Row(
+        GlanceModifier.fillMaxWidth().height(FOOTER_DP.dp).background(ImageProvider(R.drawable.widget_add_dashed)).padding(start = 14.dp)
+            .clickable(actionRunCallback<VoiceFromWidgetAction>()),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(R.drawable.icon_plus, 20, description = null)
+        Spacer(GlanceModifier.width(8.dp))
+        Text("Add or say an item", style = TextStyle(color = ColorProvider(Ink), fontSize = 15.sp, fontWeight = FontWeight.Medium), maxLines = 1)
+    }
+}
+
+@Composable
+private fun ItemRow(item: Item, state: WidgetMascotState, dot: Int?, showAge: Boolean, now: Long) {
+    val nameColor = when {
+        item.checked && state.onInk -> Mint
+        item.checked -> InkMuted
+        state.onInk -> Paper
+        else -> Ink
+    }
+    val tier = if (showAge && !item.checked) StaleSort.tierOf(item, now) else null
+    Row(GlanceModifier.fillMaxWidth().height(ROW_DP.dp), verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            GlanceModifier.size(width = 36.dp, height = ROW_DP.dp)
+                .clickable(actionRunCallback<ToggleItemAction>(actionParametersOf(ItemIdKey to item.id))),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            Icon(
+                if (item.checked) R.drawable.widget_check_on else R.drawable.widget_check_off, 20,
+                tint = if (!item.checked && state.onInk) Paper else null,
+                description = if (item.checked) "Mark not done: ${item.name}" else "Mark done: ${item.name}",
             )
-            if (item.quantity != null) {
-                Text(
-                    item.quantity,
-                    modifier = GlanceModifier.padding(start = 6.dp),
-                    style = TextStyle(color = ColorProvider(if (item.checked) Faint else QtyColor), fontSize = 13.sp, fontWeight = FontWeight.Medium),
-                    maxLines = 1,
-                )
-            }
+        }
+        if (dot != null) {
+            Image(provider = ImageProvider(DOT_DRAWABLES[dot.coerceIn(0, 3)]), contentDescription = null, modifier = GlanceModifier.size(8.dp))
+            Spacer(GlanceModifier.width(8.dp))
+        }
+        Text(
+            item.name,
+            style = TextStyle(
+                color = ColorProvider(nameColor),
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Medium,
+                textDecoration = if (item.checked) TextDecoration.LineThrough else TextDecoration.None,
+            ),
+            maxLines = 1,
+        )
+        if (item.quantity != null) {
+            Spacer(GlanceModifier.width(8.dp))
+            TagOnColor(item.quantity)
+        }
+        if (tier != null) {
+            Spacer(GlanceModifier.width(8.dp))
+            TagOnColor(if (tier == StaleTier.Day) "since yesterday" else tier.label)
+        }
+        Spacer(GlanceModifier.defaultWeight())
+        if (!item.checked) {
             Box(
-                GlanceModifier.size(width = 40.dp, height = 38.dp)
+                GlanceModifier.size(width = 36.dp, height = ROW_DP.dp)
                     .clickable(actionRunCallback<RemoveItemAction>(actionParametersOf(ItemIdKey to item.id))),
                 contentAlignment = Alignment.CenterEnd,
-            ) { Icon(R.drawable.icon_minus, 18, description = "Remove ${item.name}") }
+            ) { Icon(R.drawable.icon_minus, 18, tint = if (state.onInk) Paper else null, description = "Remove ${item.name}") }
         }
-        Box(GlanceModifier.fillMaxWidth().height(1.dp).background(ColorProvider(Line))) {}
     }
 }
 
+/** Quantity and age tags on a coloured surface: paper fill, ink text. */
 @Composable
-private fun EmptyBody() {
-    Column(GlanceModifier.fillMaxSize().clickable(actionRunCallback<AddFromStripAction>())) {
-        Spacer(GlanceModifier.defaultWeight())
-        Box(GlanceModifier.fillMaxWidth().height(1.dp).background(ColorProvider(Line))) {}
-        Text(
-            "+ Add something",
-            modifier = GlanceModifier.padding(top = 10.dp),
-            style = TextStyle(color = ColorProvider(Orange), fontSize = 15.sp, fontWeight = FontWeight.Bold),
-        )
+private fun TagOnColor(text: String) {
+    Box(GlanceModifier.background(ImageProvider(R.drawable.widget_tag_paper)).padding(horizontal = 8.dp, vertical = 2.dp)) {
+        Text(text, style = TextStyle(color = ColorProvider(Ink), fontSize = 11.sp, fontWeight = FontWeight.Bold), maxLines = 1)
     }
 }
 
 @Composable
 private fun MinimizedPill(context: Context, state: WidgetMascotState, copy: WidgetCopy) {
-    val textColor = if (state.faceIsLight) 0xFFFFFFFF.toInt() else 0xFF171717.toInt()
-    val iconTint = if (state.faceIsLight) Color.White else Ink
+    val textColor = if (state.onInk) 0xFFFFFFFF.toInt() else 0xFF14293A.toInt()
     Row(
-        GlanceModifier.fillMaxWidth().height(60.dp).background(ImageProvider(pillDrawable(state)))
-            .padding(start = 18.dp, end = 12.dp).clickable(actionRunCallback<ToggleMinimizeAction>()),
+        GlanceModifier.fillMaxWidth().height(60.dp).background(ImageProvider(state.pill))
+            .padding(start = 8.dp, end = 12.dp).clickable(actionRunCallback<ToggleMinimizeAction>()),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(state.face, PILL_FACE_DP, description = null)
-        Spacer(GlanceModifier.width(14.dp))
-        BitmapText(WidgetBitmaps.text(context, copy.pillLabel, 17f, textColor), copy.pillLabel)
+        Image(provider = ImageProvider(state.tile), contentDescription = null, modifier = GlanceModifier.size(44.dp), contentScale = ContentScale.Fit)
+        Spacer(GlanceModifier.width(12.dp))
+        BitmapText(WidgetBitmaps.text(context, copy.pillLabel, 16f, textColor), copy.pillLabel)
         Spacer(GlanceModifier.defaultWeight())
-        Icon(R.drawable.icon_chevron_up, 18, tint = iconTint, description = "Expand")
+        Icon(R.drawable.icon_chevron_up, 20, tint = textOn(state), description = "Expand")
     }
 }
 
 @Composable
 private fun Takeover(context: Context, state: WidgetMascotState, copy: WidgetCopy) {
-    val textColor = if (state.faceIsLight) 0xFFFFFFFF.toInt() else 0xFF171717.toInt()
+    val textColor = if (state.onInk) 0xFFFFFFFF.toInt() else 0xFF14293A.toInt()
     Column(
-        GlanceModifier.fillMaxSize().background(ImageProvider(takeoverDrawable(state))).clickable(actionRunCallback<DismissTakeoverAction>()),
+        GlanceModifier.fillMaxSize().background(ImageProvider(state.card)).clickable(actionRunCallback<DismissTakeoverAction>()),
         verticalAlignment = Alignment.CenterVertically,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Icon(state.face, TAKEOVER_FACE_DP, description = null)
-        Spacer(GlanceModifier.height(10.dp))
-        BitmapText(WidgetBitmaps.text(context, copy.takeoverLine, 18f, textColor), copy.takeoverLine)
+        Image(provider = ImageProvider(state.tile), contentDescription = null, modifier = GlanceModifier.size(96.dp), contentScale = ContentScale.Fit)
+        Spacer(GlanceModifier.height(12.dp))
+        BitmapText(WidgetBitmaps.text(context, copy.takeoverLine, 22f, textColor), copy.takeoverLine)
     }
 }

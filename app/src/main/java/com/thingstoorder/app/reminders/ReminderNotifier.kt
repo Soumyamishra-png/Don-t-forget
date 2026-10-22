@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
+import androidx.core.graphics.drawable.toBitmap
 import com.thingstoorder.app.MainActivity
 import com.thingstoorder.app.R
 import com.thingstoorder.app.data.Item
@@ -50,14 +51,15 @@ object ReminderNotifier {
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_watch)
-            .setColor(0xFFFF5E1A.toInt())
+            .setColor(0xFF14293A.toInt())
+            .setLargeIcon(faceIcon(context, R.drawable.face_tile_eager))
             .setContentTitle(title)
             .setContentText("Order them in one go?")
             .setStyle(NotificationCompat.BigTextStyle().bigText("$names\nOrder them in one go?"))
             .setContentIntent(open)
             .setAutoCancel(true)
             .addAction(0, "Open list", open)
-            .addAction(0, "Snooze 1h", snooze)
+            .addAction(0, "Later", snooze)
             .build()
         manager.notify(NOTIFICATION_ID, notification)
         postAddPrompt(context, manager, snooze)
@@ -82,7 +84,8 @@ object ReminderNotifier {
         )
         val notification = NotificationCompat.Builder(context, ADD_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_watch)
-            .setColor(0xFFFF5E1A.toInt())
+            .setColor(0xFF14293A.toInt())
+            .setLargeIcon(faceIcon(context, R.drawable.face_tile_neutral))
             .setContentTitle("Things to Order")
             .setContentText("Anything to add before you order?")
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
@@ -90,10 +93,13 @@ object ReminderNotifier {
             .setAutoCancel(true)
             .setContentIntent(sayIt)
             .addAction(NotificationCompat.Action.Builder(0, "Say it", sayIt).setAuthenticationRequired(false).build())
-            .addAction(0, "Snooze 1h", snooze)
+            .addAction(0, "Later", snooze)
             .build()
         manager.notify(ADD_PROMPT_ID, notification)
     }
+
+    private fun faceIcon(context: Context, res: Int) =
+        androidx.core.content.ContextCompat.getDrawable(context, res)?.toBitmap(192, 192)
 
     fun cancel(context: Context) {
         val manager = context.getSystemService(NotificationManager::class.java)
