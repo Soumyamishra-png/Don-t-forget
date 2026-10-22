@@ -1,8 +1,10 @@
 package com.thingstoorder.app.overlay
 
+import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.SystemClock
 import android.provider.Settings
@@ -19,6 +21,7 @@ import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.thingstoorder.app.data.AppDatabase
 import com.thingstoorder.app.data.ItemStore
+import com.thingstoorder.app.data.SearchLinks
 import com.thingstoorder.app.data.Item
 import com.thingstoorder.app.data.QcApp
 import com.thingstoorder.app.data.SettingsRepository
@@ -138,13 +141,28 @@ object OverlayController {
     }
 
     private fun onChipTap(item: Item) {
-        val clipboard = app.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        clipboard.setPrimaryClip(ClipData.newPlainText("item", item.name))
-        showToast("Copied \"${item.name}\"")
+        if (!searchInShoppingApp(item)) {
+            val clipboard = app.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            clipboard.setPrimaryClip(ClipData.newPlainText("item", item.name))
+            showToast("Copied \"${item.name}\"")
+        }
         if (testing) {
             items.value = items.value.filter { it.id != item.id }
         } else {
             scope.launch(Dispatchers.IO) { ItemStore(app).setChecked(item.id, true) }
+        }
+    }
+
+    /** Opens the shopping app on a search for the item, where we have a working link for that app. */
+    private fun searchInShoppingApp(item: Item): Boolean {
+        val shopping = WatcherState.foregroundApp.value ?: return false
+        val intent = SearchLinks.intentFor(shopping, item.name) ?: return false
+        return try {
+            app.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            showToast("Searching ${shopping.label} for \"${item.name}\"")
+            true
+        } catch (e: ActivityNotFoundException) {
+            false
         }
     }
 
