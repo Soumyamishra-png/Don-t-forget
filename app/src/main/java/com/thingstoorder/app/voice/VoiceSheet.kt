@@ -155,10 +155,10 @@ private fun Heard(
     ) {
         items.forEach { item ->
             Row(
-                Modifier.clip(TtoRadius.pill).background(TtoColor.Paper).padding(start = 14.dp, end = 4.dp),
+                Modifier.clip(TtoRadius.pill).background(TtoColor.Paper).padding(start = 16.dp, end = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Txt(item.name, TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.Medium), Modifier.padding(vertical = 10.dp))
+                Txt(item.name, TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.Medium), Modifier.padding(vertical = 12.dp))
                 if (item.quantity != null) {
                     Txt(item.quantity, TtoType.Tag, Modifier.padding(start = 8.dp), color = TtoColor.GreenDeep)
                 }

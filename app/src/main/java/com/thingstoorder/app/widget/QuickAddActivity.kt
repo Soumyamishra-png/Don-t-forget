@@ -70,12 +70,12 @@ class QuickAddActivity : ComponentActivity() {
                             }
                         },
                         placeholder = "Type an item…",
-                        modifier = Modifier.padding(top = 14.dp).focusRequester(focus),
+                        modifier = Modifier.padding(top = 16.dp).focusRequester(focus),
                     )
                     Txt(
                         lastAdded?.let { "Added \"$it\". Add another, or tap outside to close." } ?: "Press enter to add. Tap outside to close.",
                         TtoType.Body.copy(fontSize = 13.sp, fontWeight = FontWeight.Normal),
-                        Modifier.padding(top = 10.dp),
+                        Modifier.padding(top = 8.dp),
                         color = TtoColor.GrayBody,
                     )
                 }

@@ -175,8 +175,8 @@ private fun BitmapText(bitmap: SizedBitmap, description: String) =
 private val DOT_DRAWABLES = listOf(R.drawable.dot_member_0, R.drawable.dot_member_1, R.drawable.dot_member_2, R.drawable.dot_member_3)
 
 private const val HEAD_DP = 56
-private const val ROW_DP = 34
-private const val FOOTER_DP = 44
+private const val ROW_DP = 40
+private const val FOOTER_DP = 48
 
 @Composable
 private fun Expanded(
@@ -200,7 +200,7 @@ private fun Expanded(
                 Spacer(GlanceModifier.height(4.dp))
                 if (state == WidgetMascotState.Eager && remaining > 0) CountPill(remaining) else MoodLine(copy.caption, state)
             }
-            Box(GlanceModifier.size(36.dp).clickable(actionRunCallback<ToggleMinimizeAction>()), contentAlignment = Alignment.Center) {
+            Box(GlanceModifier.size(40.dp).clickable(actionRunCallback<ToggleMinimizeAction>()), contentAlignment = Alignment.Center) {
                 Icon(R.drawable.icon_chevron, 20, tint = tint, description = "Minimise")
             }
             Image(
@@ -236,13 +236,13 @@ private fun MoodLine(text: String, state: WidgetMascotState) {
 @Composable
 private fun CountPill(count: Int) {
     Row(
-        GlanceModifier.background(ImageProvider(R.drawable.widget_count_pill)).padding(start = 4.dp, end = 10.dp, top = 3.dp, bottom = 3.dp),
+        GlanceModifier.background(ImageProvider(R.drawable.widget_count_pill)).padding(start = 4.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(GlanceModifier.size(20.dp).background(ImageProvider(R.drawable.widget_badge_ink)), contentAlignment = Alignment.Center) {
             Text("$count", style = TextStyle(color = ColorProvider(Paper), fontSize = 11.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center))
         }
-        Spacer(GlanceModifier.width(6.dp))
+        Spacer(GlanceModifier.width(8.dp))
         Text("to order", style = TextStyle(color = ColorProvider(Ink), fontSize = 13.sp, fontWeight = FontWeight.Medium))
     }
 }
@@ -277,7 +277,7 @@ private fun ListeningFooter() {
 @Composable
 private fun AddFooter() {
     Row(
-        GlanceModifier.fillMaxWidth().height(FOOTER_DP.dp).background(ImageProvider(R.drawable.widget_add_dashed)).padding(start = 14.dp)
+        GlanceModifier.fillMaxWidth().height(FOOTER_DP.dp).background(ImageProvider(R.drawable.widget_add_dashed)).padding(start = 16.dp)
             .clickable(actionRunCallback<VoiceFromWidgetAction>()),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -298,7 +298,7 @@ private fun ItemRow(item: Item, state: WidgetMascotState, dot: Int?, showAge: Bo
     val tier = if (showAge && !item.checked) StaleSort.tierOf(item, now) else null
     Row(GlanceModifier.fillMaxWidth().height(ROW_DP.dp), verticalAlignment = Alignment.CenterVertically) {
         Box(
-            GlanceModifier.size(width = 36.dp, height = ROW_DP.dp)
+            GlanceModifier.size(width = 40.dp, height = ROW_DP.dp)
                 .clickable(actionRunCallback<ToggleItemAction>(actionParametersOf(ItemIdKey to item.id))),
             contentAlignment = Alignment.CenterStart,
         ) {
@@ -333,7 +333,7 @@ private fun ItemRow(item: Item, state: WidgetMascotState, dot: Int?, showAge: Bo
         Spacer(GlanceModifier.defaultWeight())
         if (!item.checked) {
             Box(
-                GlanceModifier.size(width = 36.dp, height = ROW_DP.dp)
+                GlanceModifier.size(width = 40.dp, height = ROW_DP.dp)
                     .clickable(actionRunCallback<RemoveItemAction>(actionParametersOf(ItemIdKey to item.id))),
                 contentAlignment = Alignment.CenterEnd,
             ) { Icon(R.drawable.icon_minus, 18, tint = if (state.onInk) Paper else null, description = "Remove ${item.name}") }
@@ -344,7 +344,7 @@ private fun ItemRow(item: Item, state: WidgetMascotState, dot: Int?, showAge: Bo
 /** Quantity and age tags on a coloured surface: paper fill, ink text. */
 @Composable
 private fun TagOnColor(text: String) {
-    Box(GlanceModifier.background(ImageProvider(R.drawable.widget_tag_paper)).padding(horizontal = 8.dp, vertical = 2.dp)) {
+    Box(GlanceModifier.background(ImageProvider(R.drawable.widget_tag_paper)).padding(horizontal = 8.dp, vertical = 4.dp)) {
         Text(text, style = TextStyle(color = ColorProvider(Ink), fontSize = 11.sp, fontWeight = FontWeight.Bold), maxLines = 1)
     }
 }

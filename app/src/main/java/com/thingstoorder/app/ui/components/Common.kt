@@ -84,7 +84,7 @@ fun PrimaryButton(label: String, enabled: Boolean = true, onClick: () -> Unit) {
 
 @Composable
 fun NotNowButton(label: String = "Not now", onClick: () -> Unit) {
-    Box(Modifier.fillMaxWidth().height(44.dp).tap(onClick = onClick), contentAlignment = Alignment.Center) {
+    Box(Modifier.fillMaxWidth().height(48.dp).tap(onClick = onClick), contentAlignment = Alignment.Center) {
         Txt(label, TtoType.Button.copy(fontSize = 14.sp), color = TtoColor.InkMuted)
     }
 }
@@ -96,7 +96,7 @@ fun StepFooter(
     onPrimary: () -> Unit,
     onNotNow: (() -> Unit)? = null,
 ) {
-    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         PrimaryButton(primaryLabel, primaryEnabled, onPrimary)
         if (onNotNow != null) NotNowButton(onClick = onNotNow)
     }
@@ -123,7 +123,7 @@ fun Chip(label: String, modifier: Modifier = Modifier) {
             .clip(TtoRadius.pill)
             .background(TtoColor.Paper)
             .border(2.dp, TtoColor.Ink, TtoRadius.pill)
-            .padding(horizontal = 16.dp, vertical = 9.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
     ) {
         Txt(label, TtoType.Chip.copy(fontSize = 14.sp))
     }

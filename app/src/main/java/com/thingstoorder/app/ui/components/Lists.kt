@@ -49,7 +49,7 @@ fun HairlineRule(modifier: Modifier = Modifier) =
 @Composable
 fun MinusButton(onClick: () -> Unit, description: String = "Remove") {
     Box(
-        Modifier.size(44.dp).tap(onClick = onClick).semantics { contentDescription = description; role = Role.Button },
+        Modifier.size(48.dp).tap(onClick = onClick).semantics { contentDescription = description; role = Role.Button },
         contentAlignment = Alignment.CenterEnd,
     ) {
         Image(painterResource(R.drawable.icon_minus), null, Modifier.size(20.dp))
@@ -97,11 +97,11 @@ fun AddField(
             )
         }
         if (onMic != null) {
-            Box(Modifier.size(44.dp).tap(onClick = onMic).semantics { contentDescription = "Say what you need" }, contentAlignment = Alignment.Center) {
+            Box(Modifier.size(48.dp).tap(onClick = onMic).semantics { contentDescription = "Say what you need" }, contentAlignment = Alignment.Center) {
                 Image(painterResource(R.drawable.icon_mic), null, Modifier.size(20.dp))
             }
         }
-        Box(Modifier.size(44.dp).tap(onClick = onSubmit).semantics { contentDescription = "Add" }, contentAlignment = Alignment.Center) {
+        Box(Modifier.size(48.dp).tap(onClick = onSubmit).semantics { contentDescription = "Add" }, contentAlignment = Alignment.Center) {
             Image(painterResource(R.drawable.icon_plus), null, Modifier.size(20.dp))
         }
     }
@@ -124,7 +124,7 @@ fun PrivacyCard() {
 @Composable
 private fun PrivacyRow(icon: Int, title: String, body: String) {
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        Image(painterResource(icon), null, Modifier.padding(top = 1.dp).size(20.dp))
+        Image(painterResource(icon), null, Modifier.size(20.dp))
         Column {
             Txt(title.uppercase(), TtoType.Caption, color = TtoColor.InkMuted)
             Txt(body, TtoType.BodySmall.copy(fontWeight = FontWeight.Normal, fontSize = 14.sp, lineHeight = 20.sp), Modifier.padding(top = 4.dp))

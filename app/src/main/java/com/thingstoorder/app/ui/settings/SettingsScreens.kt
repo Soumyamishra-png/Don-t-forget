@@ -90,7 +90,7 @@ private val rowText = TtoType.Body
 @Composable
 private fun ScreenHeader(title: String, onBack: () -> Unit) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Box(Modifier.size(44.dp).tap(onClick = onBack), contentAlignment = Alignment.CenterStart) {
+        Box(Modifier.size(48.dp).tap(onClick = onBack), contentAlignment = Alignment.CenterStart) {
             Txt("←", TtoType.ScreenTitle)
         }
         Txt(title, TtoType.ScreenTitle, Modifier.weight(1f))
@@ -99,7 +99,7 @@ private fun ScreenHeader(title: String, onBack: () -> Unit) {
 
 @Composable
 private fun SectionLabel(text: String, first: Boolean = false) =
-    Txt(text.uppercase(), TtoType.Caption, Modifier.padding(top = if (first) 20.dp else 26.dp, bottom = 4.dp), color = TtoColor.InkMuted)
+    Txt(text.uppercase(), TtoType.Caption, Modifier.padding(top = if (first) 24.dp else 32.dp, bottom = 4.dp), color = TtoColor.InkMuted)
 
 @Composable
 private fun SettingRow(
@@ -111,7 +111,7 @@ private fun SettingRow(
 ) {
     Column {
         Row(
-            modifier.fillMaxWidth().then(if (onClick != null) Modifier.tap(onClick = onClick) else Modifier).padding(vertical = 14.dp),
+            modifier.fillMaxWidth().then(if (onClick != null) Modifier.tap(onClick = onClick) else Modifier).padding(vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -167,13 +167,13 @@ fun SettingsScreen(onBack: () -> Unit, onHelp: () -> Unit, onPrivacy: () -> Unit
         SectionLabel("Reminders")
         SettingRow(
             "Remind me",
-            leading = { Image(painterResource(R.drawable.icon_bell), null, Modifier.size(width = 14.dp, height = 16.dp)) },
+            leading = { Image(painterResource(R.drawable.icon_bell), null, Modifier.size(16.dp)) },
             onClick = { pickerOpen = true },
         ) {
             ValueText(reminder.label, bold = true)
             Txt("›", TtoType.Body.copy(fontSize = 22.sp, fontWeight = FontWeight.Normal), color = TtoColor.GrayBody)
         }
-        SettingRow("At", leading = { Image(painterResource(R.drawable.icon_clock), null, Modifier.size(14.dp)) }) { ValueText(reminder.times) }
+        SettingRow("At", leading = { Image(painterResource(R.drawable.icon_clock), null, Modifier.size(16.dp)) }) { ValueText(reminder.times) }
         SettingRow(
             "Send a test reminder",
             onClick = {
@@ -242,7 +242,7 @@ private fun ReminderPicker(current: ReminderSetting, onSave: (ReminderMode?, Int
                     listOf(2, 4, 6, 8).forEach { h ->
                         val selected = hours == h
                         Box(
-                            Modifier.weight(1f).height(44.dp).clip(TtoRadius.pill).background(if (selected) TtoColor.Ink else TtoColor.Paper)
+                            Modifier.weight(1f).height(48.dp).clip(TtoRadius.pill).background(if (selected) TtoColor.Ink else TtoColor.Paper)
                                 .border(2.dp, TtoColor.Ink, TtoRadius.pill).tap { hours = h },
                             contentAlignment = Alignment.Center,
                         ) { Txt("${h}h", TtoType.Chip, color = if (selected) TtoColor.Paper else TtoColor.Ink) }
@@ -268,7 +268,7 @@ fun HelpScreen(onBack: () -> Unit, onCheckPermissions: () -> Unit) {
         Txt(
             "Some phones stop background apps to save battery. Check these three, in order.",
             TtoType.BodySmall,
-            Modifier.padding(top = 14.dp), color = TtoColor.InkMuted,
+            Modifier.padding(top = 16.dp), color = TtoColor.InkMuted,
         )
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(top = 20.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
             HelpStep(circles[0], 1, "Permissions still on", "Usage Access and Draw over other apps.", "Check permissions", onCheckPermissions)
@@ -287,18 +287,18 @@ fun HelpScreen(onBack: () -> Unit, onCheckPermissions: () -> Unit) {
 @Composable
 private fun HelpStep(circle: Int, number: Int, title: String, body: String, action: String?, onAction: (() -> Unit)?) {
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        Box(Modifier.size(30.dp), contentAlignment = Alignment.Center) {
+        Box(Modifier.size(32.dp), contentAlignment = Alignment.Center) {
             Image(painterResource(circle), null, Modifier.size(32.dp))
             Txt("$number", TtoType.Headline.copy(fontSize = 14.sp, lineHeight = 16.sp))
         }
         Column(Modifier.weight(1f)) {
             Txt(title, TtoType.Body.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold))
-            Txt(body, TtoType.BodySmall, Modifier.padding(top = 2.dp), color = TtoColor.InkMuted)
+            Txt(body, TtoType.BodySmall, Modifier.padding(top = 4.dp), color = TtoColor.InkMuted)
             if (action != null && onAction != null) {
                 Txt(
                     action,
                     TtoType.Button.copy(fontSize = 14.sp),
-                    Modifier.padding(top = 4.dp).tap(onClick = onAction).padding(vertical = 10.dp), color = TtoColor.GreenDeep,
+                    Modifier.padding(top = 4.dp).tap(onClick = onAction).padding(vertical = 12.dp), color = TtoColor.GreenDeep,
                 )
             }
         }

@@ -125,15 +125,15 @@ fun HomeScreen(onOpenSettings: () -> Unit, vm: HomeViewModel = viewModel()) {
     val setupBroken = apps.isNotEmpty() && (!usage || !overlay)
 
     Box(Modifier.fillMaxSize()) {
-        Column(Modifier.fillMaxSize().systemBarsPadding().imePadding().padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 16.dp)) {
-            Row(Modifier.height(44.dp), verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.fillMaxSize().systemBarsPadding().imePadding().padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 16.dp)) {
+            Row(Modifier.height(48.dp), verticalAlignment = Alignment.CenterVertically) {
                 SharePill(onClick = { shareOpen = true }, members = shared?.members?.map { it.color }.orEmpty())
                 Spacer(Modifier.weight(1f))
-                Box(Modifier.size(44.dp).tap(onClick = onOpenSettings), contentAlignment = Alignment.CenterEnd) {
+                Box(Modifier.size(48.dp).tap(onClick = onOpenSettings), contentAlignment = Alignment.CenterEnd) {
                     Image(painterResource(R.drawable.icon_settings), "Settings", Modifier.size(24.dp))
                 }
             }
-            Row(Modifier.padding(top = 8.dp), verticalAlignment = Alignment.Bottom) {
+            Row(Modifier.padding(top = 24.dp), verticalAlignment = Alignment.Bottom) {
                 Txt("Don't Forget", TtoType.Headline, Modifier.weight(1f))
                 if (remaining.isNotEmpty()) Txt("${remaining.size}", TtoType.BodySmall.copy(fontWeight = FontWeight.Medium), Modifier.padding(bottom = 4.dp), color = TtoColor.InkMuted)
             }
@@ -150,13 +150,13 @@ fun HomeScreen(onOpenSettings: () -> Unit, vm: HomeViewModel = viewModel()) {
                             if (!usage) "Usage Access is missing, so your list can't show up in your shopping apps."
                             else "Draw over other apps is off, so your list can't sit on top of your shopping apps.",
                             TtoType.BodySmall,
-                            Modifier.padding(top = 2.dp),
+                            Modifier.padding(top = 4.dp),
                         )
                     }
                     Box(
                         Modifier.clip(TtoRadius.pill).background(TtoColor.Ink)
                             .tap { if (!usage) Permissions.openUsageAccessSettings(context) else Permissions.openOverlaySettings(context) }
-                            .padding(horizontal = 16.dp, vertical = 10.dp),
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
                     ) { Txt("Fix it", TtoType.Chip, color = TtoColor.Paper) }
                 }
             }
@@ -218,7 +218,7 @@ fun HomeScreen(onOpenSettings: () -> Unit, vm: HomeViewModel = viewModel()) {
             } else {
                 Column(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     MicButton(onClick = voice.begin, size = 80)
-                    Box(Modifier.height(44.dp).tap { typing = true }.padding(horizontal = 16.dp), contentAlignment = Alignment.Center) {
+                    Box(Modifier.height(48.dp).tap { typing = true }.padding(horizontal = 16.dp), contentAlignment = Alignment.Center) {
                         Txt("or type instead", TtoType.Button.copy(fontSize = 14.sp), color = TtoColor.InkMuted)
                     }
                 }
@@ -276,13 +276,13 @@ fun HomeScreen(onOpenSettings: () -> Unit, vm: HomeViewModel = viewModel()) {
 private fun ItemRow(item: Item, vm: HomeViewModel, dot: Int?, tier: StaleTier?, onEdit: () -> Unit, onTagTap: (Rect) -> Unit) {
     Row(Modifier.fillMaxWidth().height(48.dp), verticalAlignment = Alignment.CenterVertically) {
         Box(
-            Modifier.size(44.dp).tap { vm.toggle(item) }.semantics {
+            Modifier.size(48.dp).tap { vm.toggle(item) }.semantics {
                 contentDescription = if (item.checked) "Mark not done: ${item.name}" else "Mark done: ${item.name}"
                 role = Role.Checkbox
             },
             contentAlignment = Alignment.CenterStart,
         ) { RoundCheck(item.checked, 22.dp) }
-        Row(Modifier.weight(1f).height(44.dp).tap(onClick = onEdit), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.weight(1f).height(48.dp).tap(onClick = onEdit), verticalAlignment = Alignment.CenterVertically) {
             if (dot != null) {
                 Box(Modifier.size(8.dp).clip(CircleShape).background(MemberColors[dot.coerceIn(0, 3)]))
                 Spacer(Modifier.width(8.dp))
@@ -348,7 +348,7 @@ private fun KeepCard(item: Item, tier: StaleTier, addedBy: String?, anchor: Rect
                 TtoType.BodySmall, color = TtoColor.InkMuted,
             )
             Box(
-                Modifier.padding(top = 12.dp).fillMaxWidth().height(44.dp).clip(TtoRadius.md).background(TtoColor.Ink).tap(onClick = onKeep),
+                Modifier.padding(top = 12.dp).fillMaxWidth().height(48.dp).clip(TtoRadius.md).background(TtoColor.Ink).tap(onClick = onKeep),
                 contentAlignment = Alignment.Center,
             ) { Txt("Keep", TtoType.Button, color = TtoColor.Paper) }
         }
@@ -375,7 +375,7 @@ private fun AllSortedState(onClearDone: () -> Unit) {
         Spacer(Modifier.height(8.dp))
         Txt("All sorted!", TtoType.ScreenTitle)
         Txt("Everything's in the cart.", TtoType.BodySmall, Modifier.padding(top = 4.dp), color = TtoColor.InkMuted)
-        Box(Modifier.padding(top = 12.dp).height(44.dp).tap(onClick = onClearDone).padding(horizontal = 16.dp), contentAlignment = Alignment.Center) {
+        Box(Modifier.padding(top = 12.dp).height(48.dp).tap(onClick = onClearDone).padding(horizontal = 16.dp), contentAlignment = Alignment.Center) {
             Txt("Clear done", TtoType.Button.copy(fontSize = 14.sp), color = TtoColor.GreenDeep)
         }
     }
@@ -406,7 +406,7 @@ private fun EditSheet(item: Item, onDismiss: () -> Unit, onSave: (String, String
                     .tap(canSave) { onSave(name.text, note.text) },
                 contentAlignment = Alignment.Center,
             ) { Txt("Save", TtoType.Button, color = if (canSave) TtoColor.Paper else TtoColor.InkSubtle) }
-            Box(Modifier.fillMaxWidth().height(44.dp).tap(onClick = onDelete), contentAlignment = Alignment.Center) {
+            Box(Modifier.fillMaxWidth().height(48.dp).tap(onClick = onDelete), contentAlignment = Alignment.Center) {
                 Txt("Delete", TtoType.Button.copy(fontSize = 14.sp), color = TtoColor.CoralDeep)
             }
         }

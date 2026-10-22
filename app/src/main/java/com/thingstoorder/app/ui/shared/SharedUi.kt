@@ -175,19 +175,20 @@ private fun ColumnScope.CreateView(vm: SharedViewModel, name: String, onName: (S
         TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.Normal, lineHeight = 20.sp),
         Modifier.padding(top = 4.dp), color = TtoColor.GrayBody,
     )
-    Txt("YOUR NAME", TtoType.Caption, Modifier.padding(top = 18.dp), color = TtoColor.GraySecondary)
-    SheetInput(name, onName, "What should they call you?", Modifier.padding(top = 6.dp), ImeAction.Done)
+    Txt("YOUR NAME", TtoType.Caption, Modifier.padding(top = 16.dp), color = TtoColor.GraySecondary)
+    SheetInput(name, onName, "What should they call you?", Modifier.padding(top = 8.dp), ImeAction.Done)
     ErrorText(vm.error)
     val can = name.isNotBlank() && !vm.busy
     Box(
-        Modifier.padding(top = 18.dp).fillMaxWidth().clip(TtoRadius.md).background(if (can) TtoColor.Ink else TtoColor.Line)
+        Modifier.padding(top = 16.dp).fillMaxWidth().clip(TtoRadius.md).background(if (can) TtoColor.Ink else TtoColor.Line)
             .tap(can, onClick = onCreate).height(52.dp),
         contentAlignment = Alignment.Center,
     ) { Txt(if (vm.busy) "Making your code…" else "Create code", TtoType.Button, color = Color.White) }
     Txt(
         "Have a code? Join a list",
-        TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.SemiBold, textDecoration = TextDecoration.Underline),
-        Modifier.align(Alignment.CenterHorizontally).padding(top = 10.dp).tap(onClick = onJoin).padding(8.dp),
+        TtoType.Button.copy(fontSize = 14.sp),
+        Modifier.align(Alignment.CenterHorizontally).padding(top = 8.dp).tap(onClick = onJoin).padding(8.dp),
+        color = TtoColor.GreenDeep,
     )
 }
 
@@ -217,7 +218,7 @@ private fun ColumnScope.SharedView(
         }
     }
 
-    Column(Modifier.padding(top = 14.dp)) {
+    Column(Modifier.padding(top = 16.dp)) {
         if (members.isEmpty()) {
             MemberRow("You", 0, "1 of $MAX_MEMBERS", null)
         } else {
@@ -239,7 +240,7 @@ private fun ColumnScope.SharedView(
     ) { Txt("Send invite code", TtoType.Button, color = Color.White) }
     Txt(
         if (confirmLeave) "Tap again to leave. Your items stay on this phone." else "Leave this list",
-        TtoType.Body.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold, textDecoration = TextDecoration.Underline),
+        TtoType.Button.copy(fontSize = 14.sp),
         Modifier.align(Alignment.CenterHorizontally).padding(top = 8.dp).tap(onClick = onLeaveTap).padding(8.dp),
         color = TtoColor.CoralDeep,
     )
@@ -247,14 +248,14 @@ private fun ColumnScope.SharedView(
 
 @Composable
 private fun MemberRow(name: String, color: Int, trailing: String?, onRemove: (() -> Unit)?) {
-    Row(Modifier.fillMaxWidth().padding(vertical = 7.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.size(12.dp).clip(CircleShape).background(MemberColors[color.coerceIn(0, MemberColors.lastIndex)]))
         Txt(name, TtoType.Body.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold), Modifier.padding(start = 12.dp).weight(1f))
         if (onRemove != null) {
             Txt(
                 "Remove",
                 TtoType.Button.copy(fontSize = 14.sp),
-                Modifier.tap(onClick = onRemove).padding(horizontal = 6.dp, vertical = 12.dp), color = TtoColor.CoralDeep,
+                Modifier.tap(onClick = onRemove).padding(horizontal = 8.dp, vertical = 12.dp), color = TtoColor.CoralDeep,
             )
         } else if (trailing != null) {
             Txt(trailing, TtoType.BodySmall, color = TtoColor.GraySecondary)
@@ -272,18 +273,18 @@ private fun ColumnScope.JoinCodeView(
         "Type the code you were sent.",
         TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.Normal), Modifier.padding(top = 4.dp), color = TtoColor.GrayBody,
     )
-    Txt("CODE", TtoType.Caption, Modifier.padding(top = 18.dp), color = TtoColor.GraySecondary)
-    SheetInput(code, onCode, "e.g. K7Q2XM", Modifier.padding(top = 6.dp), ImeAction.Next, caps = KeyboardCapitalization.Characters)
-    Txt("YOUR NAME", TtoType.Caption, Modifier.padding(top = 14.dp), color = TtoColor.GraySecondary)
-    SheetInput(name, onName, "What should they call you?", Modifier.padding(top = 6.dp), ImeAction.Done)
+    Txt("CODE", TtoType.Caption, Modifier.padding(top = 16.dp), color = TtoColor.GraySecondary)
+    SheetInput(code, onCode, "e.g. K7Q2XM", Modifier.padding(top = 8.dp), ImeAction.Next, caps = KeyboardCapitalization.Characters)
+    Txt("YOUR NAME", TtoType.Caption, Modifier.padding(top = 16.dp), color = TtoColor.GraySecondary)
+    SheetInput(name, onName, "What should they call you?", Modifier.padding(top = 8.dp), ImeAction.Done)
     ErrorText(vm.error)
     val can = code.length >= 4 && name.isNotBlank() && !vm.busy
     Box(
-        Modifier.padding(top = 18.dp).fillMaxWidth().clip(TtoRadius.md).background(if (can) TtoColor.Ink else TtoColor.Line)
+        Modifier.padding(top = 16.dp).fillMaxWidth().clip(TtoRadius.md).background(if (can) TtoColor.Ink else TtoColor.Line)
             .tap(can, onClick = onContinue).height(52.dp),
         contentAlignment = Alignment.Center,
     ) { Txt("Continue", TtoType.Button, color = Color.White) }
-    Txt("Back", TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.SemiBold), Modifier.align(Alignment.CenterHorizontally).padding(top = 6.dp).tap(onClick = onBack).padding(8.dp), color = TtoColor.GrayBody)
+    Txt("Back", TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.SemiBold), Modifier.align(Alignment.CenterHorizontally).padding(top = 8.dp).tap(onClick = onBack).padding(8.dp), color = TtoColor.GrayBody)
 }
 
 @Composable
@@ -291,7 +292,7 @@ private fun ColumnScope.ConfirmView(vm: SharedViewModel, onJoin: () -> Unit, onB
     val preview = vm.preview ?: return
     Txt(
         "${preview.ownerName.ifBlank { "Someone" }} invited you to their list", TtoType.SectionTitle,
-        Modifier.padding(top = 14.dp),
+        Modifier.padding(top = 16.dp),
     )
     Txt(
         if (vm.localNames.isEmpty()) "You have no items yet, so you'll just see theirs."
@@ -300,9 +301,9 @@ private fun ColumnScope.ConfirmView(vm: SharedViewModel, onJoin: () -> Unit, onB
         Modifier.padding(top = 4.dp), color = TtoColor.GrayBody,
     )
     if (vm.localNames.isNotEmpty()) {
-        FlowRow(Modifier.padding(top = 14.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        FlowRow(Modifier.padding(top = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             vm.localNames.take(8).forEach {
-                Box(Modifier.clip(TtoRadius.pill).background(TtoColor.OffWhite).padding(horizontal = 12.dp, vertical = 6.dp)) {
+                Box(Modifier.clip(TtoRadius.pill).background(TtoColor.OffWhite).padding(horizontal = 12.dp, vertical = 8.dp)) {
                     Txt(it, TtoType.Body.copy(fontSize = 13.sp, fontWeight = FontWeight.Normal))
                 }
             }
@@ -314,12 +315,12 @@ private fun ColumnScope.ConfirmView(vm: SharedViewModel, onJoin: () -> Unit, onB
             .tap(!vm.busy, onClick = onJoin).height(52.dp),
         contentAlignment = Alignment.Center,
     ) { Txt(if (vm.busy) "Joining…" else "Join list", TtoType.Button, color = Color.White) }
-    Txt("Not now", TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.SemiBold), Modifier.align(Alignment.CenterHorizontally).padding(top = 6.dp).tap(onClick = onBack).padding(8.dp), color = TtoColor.GrayBody)
+    Txt("Not now", TtoType.Body.copy(fontSize = 14.sp, fontWeight = FontWeight.SemiBold), Modifier.align(Alignment.CenterHorizontally).padding(top = 8.dp).tap(onClick = onBack).padding(8.dp), color = TtoColor.GrayBody)
 }
 
 @Composable
 private fun ErrorText(message: String?) {
-    if (message != null) Txt(message, TtoType.BodySmall.copy(fontSize = 13.sp), Modifier.padding(top = 10.dp), color = TtoColor.OrangeText)
+    if (message != null) Txt(message, TtoType.BodySmall.copy(fontSize = 13.sp), Modifier.padding(top = 8.dp), color = TtoColor.OrangeText)
 }
 
 @Composable
@@ -354,9 +355,9 @@ private fun copy(context: Context, code: String) {
 fun SharePill(onClick: () -> Unit, members: List<Int>, modifier: Modifier = Modifier) {
     val shared = members.isNotEmpty()
     Row(
-        modifier.height(36.dp).clip(TtoRadius.pill).background(if (shared) TtoColor.TealSoft else TtoColor.Ink).tap(onClick = onClick)
+        modifier.height(40.dp).clip(TtoRadius.pill).background(if (shared) TtoColor.TealSoft else TtoColor.Ink).tap(onClick = onClick)
             .semantics { contentDescription = if (shared) "Shared with ${members.size} people. Open sharing." else "Share list" }
-            .padding(horizontal = 14.dp),
+            .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (!shared) {

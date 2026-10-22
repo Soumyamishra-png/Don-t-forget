@@ -54,7 +54,7 @@ fun ExpandedOverlay(items: List<Item>, toast: String?, onChip: (Item) -> Unit, o
         if (toast != null) {
             Box(
                 Modifier.shadow(10.dp, TtoRadius.pill, ambientColor = TtoColor.Ink.copy(alpha = 0.16f), spotColor = TtoColor.Ink.copy(alpha = 0.16f))
-                    .clip(TtoRadius.pill).background(TtoColor.Paper).padding(horizontal = 16.dp, vertical = 10.dp),
+                    .clip(TtoRadius.pill).background(TtoColor.Paper).padding(horizontal = 16.dp, vertical = 8.dp),
             ) {
                 Txt(toast, TtoType.Chip.copy(fontSize = 14.sp), color = TtoColor.Ink)
             }
@@ -87,10 +87,10 @@ fun ExpandedOverlay(items: List<Item>, toast: String?, onChip: (Item) -> Unit, o
 @Composable
 private fun MinimizeButton(onClick: () -> Unit) {
     Box(
-        Modifier.size(44.dp).tap(onClick = onClick).semantics { contentDescription = "Minimize"; role = Role.Button },
+        Modifier.size(48.dp).tap(onClick = onClick).semantics { contentDescription = "Minimize"; role = Role.Button },
         contentAlignment = Alignment.Center,
     ) {
-        Image(painterResource(R.drawable.icon_chevron), null, Modifier.size(22.dp))
+        Image(painterResource(R.drawable.icon_chevron), null, Modifier.size(24.dp))
     }
 }
 
@@ -113,14 +113,14 @@ fun DoneOverlay() {
 /** Minimised: an ink rounded pill with a small green face and the count left. */
 @Composable
 fun PillOverlay(count: Int) {
-    Box(Modifier.padding(14.dp).semantics { contentDescription = "$count left to order. Tap to open." }) {
+    Box(Modifier.padding(16.dp).semantics { contentDescription = "$count left to order. Tap to open." }) {
         Row(
             Modifier.shadow(12.dp, TtoRadius.lg, ambientColor = FloatShadow, spotColor = FloatShadow)
-                .background(TtoColor.Ink, TtoRadius.lg).padding(start = 6.dp, end = 16.dp, top = 6.dp, bottom = 6.dp),
+                .background(TtoColor.Ink, TtoRadius.lg).padding(start = 8.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             FaceTile(FaceMood.Happy, 40.dp)
-            Txt("$count", TtoType.ScreenTitle.copy(fontSize = 20.sp, lineHeight = 24.sp), Modifier.padding(start = 10.dp), color = TtoColor.Paper)
+            Txt("$count", TtoType.ScreenTitle.copy(fontSize = 20.sp, lineHeight = 24.sp), Modifier.padding(start = 12.dp), color = TtoColor.Paper)
         }
     }
 }
