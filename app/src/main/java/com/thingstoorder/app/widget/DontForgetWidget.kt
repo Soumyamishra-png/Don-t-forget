@@ -177,6 +177,7 @@ private val DOT_DRAWABLES = listOf(R.drawable.dot_member_0, R.drawable.dot_membe
 private const val HEAD_DP = 56
 private const val ROW_DP = 40
 private const val FOOTER_DP = 48
+private const val PILL_DP = 28
 
 @Composable
 private fun Expanded(
@@ -184,8 +185,10 @@ private fun Expanded(
     dots: Map<String, Int>, now: Long,
 ) {
     val height = LocalSize.current.height.value.toInt()
-    // 16dp padding top and bottom, header, two 8dp gaps and the footer come off the card's height.
-    val rowsFit = ((height + 40 - 32 - HEAD_DP - 16 - FOOTER_DP) / ROW_DP).coerceIn(1, 5)
+    val showPill = remaining > 0 || state == WidgetMascotState.AllDone
+    // 16dp padding top and bottom, header, the pill row (8dp under the header), a 16dp gap, an 8dp gap and the footer come off the card's height.
+    val pillBlock = if (showPill) PILL_DP + 8 else 0
+    val rowsFit = ((height + 40 - 32 - HEAD_DP - pillBlock - 16 - 8 - FOOTER_DP) / ROW_DP).coerceIn(1, 5)
     val arranged = StaleSort.arrange(items, now)
     val shown = arranged.take(rowsFit)
     val tint = textOn(state)
@@ -197,8 +200,6 @@ private fun Expanded(
                     WidgetBitmaps.text(context, "Things to Order", 20f, if (state.onInk) 0xFFFFFFFF.toInt() else 0xFF14293A.toInt()),
                     "Things to Order",
                 )
-                Spacer(GlanceModifier.height(4.dp))
-                if (state == WidgetMascotState.Eager && remaining > 0) CountPill(remaining) else MoodLine(copy.caption, state)
             }
             Box(GlanceModifier.size(40.dp).clickable(actionRunCallback<ToggleMinimizeAction>()), contentAlignment = Alignment.Center) {
                 Icon(R.drawable.icon_chevron, 20, tint = tint, description = "Minimise")
@@ -210,7 +211,11 @@ private fun Expanded(
                 contentScale = ContentScale.Fit,
             )
         }
-        Spacer(GlanceModifier.height(8.dp))
+        if (showPill) {
+            Spacer(GlanceModifier.height(8.dp))
+            if (remaining > 0) CountPill(remaining) else DonePill()
+        }
+        Spacer(GlanceModifier.height(16.dp))
         Column(GlanceModifier.fillMaxWidth().defaultWeight()) {
             if (shown.isEmpty()) {
                 Spacer(GlanceModifier.defaultWeight())
@@ -228,15 +233,20 @@ private fun Expanded(
 }
 
 @Composable
-private fun MoodLine(text: String, state: WidgetMascotState) {
-    Text(text, style = TextStyle(color = ColorProvider(moodOn(state)), fontSize = 14.sp), maxLines = 1)
+private fun DonePill() {
+    Row(
+        GlanceModifier.height(PILL_DP.dp).background(ImageProvider(R.drawable.widget_count_pill)).padding(horizontal = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text("All sorted", style = TextStyle(color = ColorProvider(Ink), fontSize = 13.sp, fontWeight = FontWeight.Medium))
+    }
 }
 
-/** "3 to order": a paper pill with an ink badge, shown on the eager (green) state. */
+/** "3 to order": a paper pill with an ink badge, shown whenever something is left. */
 @Composable
 private fun CountPill(count: Int) {
     Row(
-        GlanceModifier.background(ImageProvider(R.drawable.widget_count_pill)).padding(start = 4.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
+        GlanceModifier.height(PILL_DP.dp).background(ImageProvider(R.drawable.widget_count_pill)).padding(start = 4.dp, end = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(GlanceModifier.size(20.dp).background(ImageProvider(R.drawable.widget_badge_ink)), contentAlignment = Alignment.Center) {
